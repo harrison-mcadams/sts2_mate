@@ -1,0 +1,392 @@
+{
+  "POTION.ASHWATER": {
+    "id": "POTION.ASHWATER",
+    "key": "ASHWATER",
+    "name": "Ashwater",
+    "description": "Exhaust any number of cards in your Hand."
+  },
+  "POTION.ATTACK_POTION": {
+    "id": "POTION.ATTACK_POTION",
+    "key": "ATTACK_POTION",
+    "name": "Attack Potion",
+    "description": "Choose 1 of 3 random Attack cards to add into your Hand. It's free to play this turn."
+  },
+  "POTION.BEETLE_JUICE": {
+    "id": "POTION.BEETLE_JUICE",
+    "key": "BEETLE_JUICE",
+    "name": "Beetle Juice",
+    "description": "Enemy's attacks deal {DamageDecrease}% less damage {Repeat} for the next { turns}."
+  },
+  "POTION.BLESSING_OF_THE_FORGE": {
+    "id": "POTION.BLESSING_OF_THE_FORGE",
+    "key": "BLESSING_OF_THE_FORGE",
+    "name": "Blessing of the Forge",
+    "description": "Upgrade all cards in your Hand for the rest of combat."
+  },
+  "POTION.BLOCK_POTION": {
+    "id": "POTION.BLOCK_POTION",
+    "key": "BLOCK_POTION",
+    "name": "Block Potion",
+    "description": "Gain {Block} Block."
+  },
+  "POTION.BLOOD_POTION": {
+    "id": "POTION.BLOOD_POTION",
+    "key": "BLOOD_POTION",
+    "name": "Blood Potion",
+    "description": "Heal for {HealPercent}% of your Max HP."
+  },
+  "POTION.BONE_BREW": {
+    "id": "POTION.BONE_BREW",
+    "key": "BONE_BREW",
+    "name": "Bone Brew",
+    "description": "Summon {Summon}."
+  },
+  "POTION.BOTTLED_POTENTIAL": {
+    "id": "POTION.BOTTLED_POTENTIAL",
+    "key": "BOTTLED_POTENTIAL",
+    "name": "Bottled Potential",
+    "description": "Shuffle ALL your cards into your Draw Pile. Draw {Cards} {Cards} cards."
+  },
+  "POTION.CLARITY": {
+    "id": "POTION.CLARITY",
+    "key": "CLARITY",
+    "name": "Clarity Extract",
+    "description": "Draw {Cards} {Cards} cards. At the start of your next {ClarityPower} { turns}, draw 1 additional card."
+  },
+  "POTION.COLORLESS_POTION": {
+    "id": "POTION.COLORLESS_POTION",
+    "key": "COLORLESS_POTION",
+    "name": "Colorless Potion",
+    "description": "Choose 1 of 3 random Colorless cards to add into your Hand. It's free to play this turn."
+  },
+  "POTION.COSMIC_CONCOCTION": {
+    "id": "POTION.COSMIC_CONCOCTION",
+    "key": "COSMIC_CONCOCTION",
+    "name": "Cosmic Concoction",
+    "description": "Add {Cards} Upgraded Colorless {Cards} cards into your Hand."
+  },
+  "POTION.CUNNING_POTION": {
+    "id": "POTION.CUNNING_POTION",
+    "key": "CUNNING_POTION",
+    "name": "Cunning Potion",
+    "description": "Add {Cards} Upgraded {Cards} Shivs into your Hand."
+  },
+  "POTION.CURE_ALL": {
+    "id": "POTION.CURE_ALL",
+    "key": "CURE_ALL",
+    "name": "Cure All",
+    "description": "Gain . Draw {Cards} {Cards} cards."
+  },
+  "POTION.DEPRECATED_POTION": {
+    "id": "POTION.DEPRECATED_POTION",
+    "key": "DEPRECATED_POTION",
+    "name": "Deprecated Potion",
+    "description": "This potion has been removed from the game."
+  },
+  "POTION.DEXTERITY_POTION": {
+    "id": "POTION.DEXTERITY_POTION",
+    "key": "DEXTERITY_POTION",
+    "name": "Dexterity Potion",
+    "description": "Gain {DexterityPower} Dexterity."
+  },
+  "POTION.DISTILLED_CHAOS": {
+    "id": "POTION.DISTILLED_CHAOS",
+    "key": "DISTILLED_CHAOS",
+    "name": "Distilled Chaos",
+    "description": "Play the top {Repeat} cards of your Draw Pile."
+  },
+  "POTION.DROPLET_OF_PRECOGNITION": {
+    "id": "POTION.DROPLET_OF_PRECOGNITION",
+    "key": "DROPLET_OF_PRECOGNITION",
+    "name": "Droplet of Precognition",
+    "description": "Choose a card in your Draw Pile and add it into your Hand."
+  },
+  "POTION.DUPLICATOR": {
+    "id": "POTION.DUPLICATOR",
+    "key": "DUPLICATOR",
+    "name": "Duplicator",
+    "description": "This turn, your next card is played an extra time."
+  },
+  "POTION.ENERGY_POTION": {
+    "id": "POTION.ENERGY_POTION",
+    "key": "ENERGY_POTION",
+    "name": "Energy Potion",
+    "description": "Gain ."
+  },
+  "POTION.ENTROPIC_BREW": {
+    "id": "POTION.ENTROPIC_BREW",
+    "key": "ENTROPIC_BREW",
+    "name": "Entropic Brew",
+    "description": "Fill all your empty potion slots with random potions."
+  },
+  "POTION.ESSENCE_OF_DARKNESS": {
+    "id": "POTION.ESSENCE_OF_DARKNESS",
+    "key": "ESSENCE_OF_DARKNESS",
+    "name": "Essence of Darkness",
+    "description": "Channel a Dark for each of your Orb Slots."
+  },
+  "POTION.EXPLOSIVE_AMPOULE": {
+    "id": "POTION.EXPLOSIVE_AMPOULE",
+    "key": "EXPLOSIVE_AMPOULE",
+    "name": "Explosive Ampoule",
+    "description": "Deal {Damage} damage to ALL enemies."
+  },
+  "POTION.FAIRY_IN_A_BOTTLE": {
+    "id": "POTION.FAIRY_IN_A_BOTTLE",
+    "key": "FAIRY_IN_A_BOTTLE",
+    "name": "Fairy in a Bottle",
+    "description": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP."
+  },
+  "POTION.FIRE_POTION": {
+    "id": "POTION.FIRE_POTION",
+    "key": "FIRE_POTION",
+    "name": "Fire Potion",
+    "description": "Deal {Damage} damage."
+  },
+  "POTION.FLEX_POTION": {
+    "id": "POTION.FLEX_POTION",
+    "key": "FLEX_POTION",
+    "name": "Flex Potion",
+    "description": "Gain {StrengthPower} Strength. At the end of your turn, lose {StrengthPower} Strength."
+  },
+  "POTION.FOCUS_POTION": {
+    "id": "POTION.FOCUS_POTION",
+    "key": "FOCUS_POTION",
+    "name": "Focus Potion",
+    "description": "Gain {FocusPower} Focus."
+  },
+  "POTION.FORTIFIER": {
+    "id": "POTION.FORTIFIER",
+    "key": "FORTIFIER",
+    "name": "Fortifier",
+    "description": "Triple your Block."
+  },
+  "POTION.FOUL_POTION": {
+    "id": "POTION.FOUL_POTION",
+    "key": "FOUL_POTION",
+    "name": "Foul Potion",
+    "description": "Deal {Damage} damage to ALL players and enemies.\nCan be thrown at the Merchant for {Gold} Gold instead."
+  },
+  "POTION.FRUIT_JUICE": {
+    "id": "POTION.FRUIT_JUICE",
+    "key": "FRUIT_JUICE",
+    "name": "Fruit Juice",
+    "description": "Gain {MaxHp} Max HP."
+  },
+  "POTION.FYSH_OIL": {
+    "id": "POTION.FYSH_OIL",
+    "key": "FYSH_OIL",
+    "name": "Fysh Oil",
+    "description": "Gain {StrengthPower} Strength and {DexterityPower} Dexterity."
+  },
+  "POTION.GAMBLERS_BREW": {
+    "id": "POTION.GAMBLERS_BREW",
+    "key": "GAMBLERS_BREW",
+    "name": "Gambler's Brew",
+    "description": "Discard any number of cards, then draw that many."
+  },
+  "POTION.GHOST_IN_A_JAR": {
+    "id": "POTION.GHOST_IN_A_JAR",
+    "key": "GHOST_IN_A_JAR",
+    "name": "Ghost in a Jar",
+    "description": "Gain 1 Intangible."
+  },
+  "POTION.GIGANTIFICATION_POTION": {
+    "id": "POTION.GIGANTIFICATION_POTION",
+    "key": "GIGANTIFICATION_POTION",
+    "name": "Gigantification Potion",
+    "description": "The next Attack you play deals triple damage."
+  },
+  "POTION.GLOWWATER_POTION": {
+    "id": "POTION.GLOWWATER_POTION",
+    "key": "GLOWWATER_POTION",
+    "name": "Glowwater Potion",
+    "description": "Exhaust your Hand. Draw {Cards} cards."
+  },
+  "POTION.HEART_OF_IRON": {
+    "id": "POTION.HEART_OF_IRON",
+    "key": "HEART_OF_IRON",
+    "name": "Heart of Iron",
+    "description": "Gain {PlatingPower} Plating."
+  },
+  "POTION.KINGS_COURAGE": {
+    "id": "POTION.KINGS_COURAGE",
+    "key": "KINGS_COURAGE",
+    "name": "King's Courage",
+    "description": "Forge {Forge}."
+  },
+  "POTION.LIQUID_BRONZE": {
+    "id": "POTION.LIQUID_BRONZE",
+    "key": "LIQUID_BRONZE",
+    "name": "Liquid Bronze",
+    "description": "Gain {ThornsPower} Thorns."
+  },
+  "POTION.LIQUID_MEMORIES": {
+    "id": "POTION.LIQUID_MEMORIES",
+    "key": "LIQUID_MEMORIES",
+    "name": "Liquid Memories",
+    "description": "Put a card from your Discard Pile into your Hand. It's free to play this turn."
+  },
+  "POTION.LUCKY_TONIC": {
+    "id": "POTION.LUCKY_TONIC",
+    "key": "LUCKY_TONIC",
+    "name": "Lucky Tonic",
+    "description": "Gain {BufferPower} Buffer."
+  },
+  "POTION.MAZALETHS_GIFT": {
+    "id": "POTION.MAZALETHS_GIFT",
+    "key": "MAZALETHS_GIFT",
+    "name": "Mazaleth's Gift",
+    "description": "Gain {RitualPower} Ritual."
+  },
+  "POTION.MOCK_DISCARD_AND_ADD_SHIVS_POTION": {
+    "id": "POTION.MOCK_DISCARD_AND_ADD_SHIVS_POTION",
+    "key": "MOCK_DISCARD_AND_ADD_SHIVS_POTION",
+    "name": "Mock Discard and Add Shivs Potion",
+    "description": ""
+  },
+  "POTION.OROBIC_ACID": {
+    "id": "POTION.OROBIC_ACID",
+    "key": "OROBIC_ACID",
+    "name": "Orobic Acid",
+    "description": "Add a random Attack, Skill, and Power into your Hand. They're free to play this turn."
+  },
+  "POTION.POISON_POTION": {
+    "id": "POTION.POISON_POTION",
+    "key": "POISON_POTION",
+    "name": "Poison Potion",
+    "description": "Apply {PoisonPower} Poison."
+  },
+  "POTION.POTION_OF_BINDING": {
+    "id": "POTION.POTION_OF_BINDING",
+    "key": "POTION_OF_BINDING",
+    "name": "Potion of Binding",
+    "description": "Apply {WeakPower} Weak and {VulnerablePower} Vulnerable to ALL enemies."
+  },
+  "POTION.POTION_OF_CAPACITY": {
+    "id": "POTION.POTION_OF_CAPACITY",
+    "key": "POTION_OF_CAPACITY",
+    "name": "Potion of Capacity",
+    "description": "Gain {Repeat} Orb {Repeat} Slots."
+  },
+  "POTION.POTION_OF_DOOM": {
+    "id": "POTION.POTION_OF_DOOM",
+    "key": "POTION_OF_DOOM",
+    "name": "Potion of Doom",
+    "description": "Apply {DoomPower} Doom."
+  },
+  "POTION.POTION_SHAPED_ROCK": {
+    "id": "POTION.POTION_SHAPED_ROCK",
+    "key": "POTION_SHAPED_ROCK",
+    "name": "Potion-Shaped Rock",
+    "description": "Deal {Damage} damage."
+  },
+  "POTION.POT_OF_GHOULS": {
+    "id": "POTION.POT_OF_GHOULS",
+    "key": "POT_OF_GHOULS",
+    "name": "Pot of Ghouls",
+    "description": "Add {Cards} {Cards} Souls into your Hand."
+  },
+  "POTION.POWDERED_DEMISE": {
+    "id": "POTION.POWDERED_DEMISE",
+    "key": "POWDERED_DEMISE",
+    "name": "Powdered Demise",
+    "description": "Enemy loses {Demise} HP at the end of each of its turns."
+  },
+  "POTION.POWER_POTION": {
+    "id": "POTION.POWER_POTION",
+    "key": "POWER_POTION",
+    "name": "Power Potion",
+    "description": "Choose 1 of 3 random Power cards to add into your Hand. It's free to play this turn."
+  },
+  "POTION.RADIANT_TINCTURE": {
+    "id": "POTION.RADIANT_TINCTURE",
+    "key": "RADIANT_TINCTURE",
+    "name": "Radiant Tincture",
+    "description": "Gain . Gain an additional 1  at the start of your next {RadiancePower} {RadiancePower} turns."
+  },
+  "POTION.REGEN_POTION": {
+    "id": "POTION.REGEN_POTION",
+    "key": "REGEN_POTION",
+    "name": "Regen Potion",
+    "description": "Gain {RegenPower} Regen."
+  },
+  "POTION.SHACKLING_POTION": {
+    "id": "POTION.SHACKLING_POTION",
+    "key": "SHACKLING_POTION",
+    "name": "Shackling Potion",
+    "description": "ALL enemies lose {StrengthPower} Strength this turn."
+  },
+  "POTION.SHIP_IN_A_BOTTLE": {
+    "id": "POTION.SHIP_IN_A_BOTTLE",
+    "key": "SHIP_IN_A_BOTTLE",
+    "name": "Ship in a Bottle",
+    "description": "Gain {Block} Block. Next turn, gain {Block} Block."
+  },
+  "POTION.SKILL_POTION": {
+    "id": "POTION.SKILL_POTION",
+    "key": "SKILL_POTION",
+    "name": "Skill Potion",
+    "description": "Choose 1 of 3 random Skill cards to add into your Hand. It's free to play this turn."
+  },
+  "POTION.SNECKO_OIL": {
+    "id": "POTION.SNECKO_OIL",
+    "key": "SNECKO_OIL",
+    "name": "Snecko Oil",
+    "description": "Draw {Cards} cards. Randomize the cost of cards in your Hand this turn."
+  },
+  "POTION.SOLDIERS_STEW": {
+    "id": "POTION.SOLDIERS_STEW",
+    "key": "SOLDIERS_STEW",
+    "name": "Soldier's Stew",
+    "description": "All cards containing Strike gain 1 Replay this combat."
+  },
+  "POTION.SPEED_POTION": {
+    "id": "POTION.SPEED_POTION",
+    "key": "SPEED_POTION",
+    "name": "Speed Potion",
+    "description": "Gain {DexterityPower} Dexterity. At the end of your turn, lose {DexterityPower} Dexterity."
+  },
+  "POTION.STABLE_SERUM": {
+    "id": "POTION.STABLE_SERUM",
+    "key": "STABLE_SERUM",
+    "name": "Stable Serum",
+    "description": "Retain your Hand for {Repeat} {Repeat} turns."
+  },
+  "POTION.STAR_POTION": {
+    "id": "POTION.STAR_POTION",
+    "key": "STAR_POTION",
+    "name": "Star Potion",
+    "description": "Gain {Stars:starIcons()}."
+  },
+  "POTION.STRENGTH_POTION": {
+    "id": "POTION.STRENGTH_POTION",
+    "key": "STRENGTH_POTION",
+    "name": "Strength Potion",
+    "description": "Gain {StrengthPower} Strength."
+  },
+  "POTION.SWIFT_POTION": {
+    "id": "POTION.SWIFT_POTION",
+    "key": "SWIFT_POTION",
+    "name": "Swift Potion",
+    "description": "Draw {Cards} {Cards} cards."
+  },
+  "POTION.TOUCH_OF_INSANITY": {
+    "id": "POTION.TOUCH_OF_INSANITY",
+    "key": "TOUCH_OF_INSANITY",
+    "name": "Touch of Insanity",
+    "description": "Choose a card in your Hand. It is free to play this combat."
+  },
+  "POTION.VULNERABLE_POTION": {
+    "id": "POTION.VULNERABLE_POTION",
+    "key": "VULNERABLE_POTION",
+    "name": "Vulnerable Potion",
+    "description": "Apply {VulnerablePower} Vulnerable."
+  },
+  "POTION.WEAK_POTION": {
+    "id": "POTION.WEAK_POTION",
+    "key": "WEAK_POTION",
+    "name": "Weak Potion",
+    "description": "Apply {WeakPower} Weak."
+  }
+}

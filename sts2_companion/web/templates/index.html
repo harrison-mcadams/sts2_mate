@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STS2 Companion - Slay the Spire 2 Run Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="char-ironclad">
+  <!-- Top Bar / Run HUD -->
+  <header class="top-hud">
+    <div class="hud-left">
+      <div class="logo">
+        <span class="logo-spire">SPIRE II</span>
+        <span class="logo-mate">MATE</span>
+      </div>
+      <div id="statusBadge" class="status-badge idle">
+        <span class="dot"></span>
+        <span id="statusText">CONNECTING...</span>
+      </div>
+    </div>
+
+    <div class="hud-center">
+      <div class="hud-stat" id="statChar">
+        <span class="stat-label">HERO</span>
+        <span class="stat-val" id="valChar">IRONCLAD</span>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">ASCENSION</span>
+        <span class="stat-val" id="valAsc">A0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">FLOOR</span>
+        <span class="stat-val" id="valFloor">1 (Act 1)</span>
+      </div>
+      <div class="hud-stat hp-stat">
+        <div class="hp-info">
+          <span class="stat-label">HP</span>
+          <span class="stat-val" id="valHp">80 / 80</span>
+        </div>
+        <div class="hp-bar-bg">
+          <div class="hp-bar-fill" id="hpBarFill" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">GOLD</span>
+        <span class="stat-val gold-val" id="valGold">99 🪙</span>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">DECK</span>
+        <span class="stat-val" id="valDeckSize">10 Cards</span>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <button id="btnSyncDb" class="hud-btn" title="Re-sync cards & relics directly from STS2 game installation">
+        <span class="icon">🔄</span> Re-sync DB
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="tabAdvisor">
+      <span class="tab-icon">⚖️</span> Card Reward Advisor
+    </button>
+    <button class="nav-tab" data-tab="tabDeck">
+      <span class="tab-icon">🃏</span> Deck & Relics (<span id="deckTabCount">0</span>)
+    </button>
+    <button class="nav-tab" data-tab="tabHistory">
+      <span class="tab-icon">📜</span> Player History & Stats
+    </button>
+    <button class="nav-tab" data-tab="tabCompendium">
+      <span class="tab-icon">📖</span> STS2 Compendium
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- TAB 1: CARD REWARD ADVISOR -->
+    <section id="tabAdvisor" class="tab-pane active">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Card Reward Decision Assistant</h2>
+          <p class="pane-subtitle">Contextual analysis for Slay the Spire 2: compares offered cards against your current deck synergy, relic scaling, floor threats, and personal win rates.</p>
+        </div>
+        <div id="pendingRewardNotice" class="pending-notice hidden">
+          <span>🔔 Unpicked card reward detected in current room!</span>
+          <button id="btnLoadPending" class="btn-sm">Load Choices</button>
+        </div>
+      </div>
+
+      <!-- Card Selection Inputs -->
+      <div class="reward-input-card">
+        <div class="slots-header">
+          <h3>Select Offered Cards (3 or 4)</h3>
+          <span class="hint-text">Type card name or pick from dropdown. Specific to STS2 cards.</span>
+        </div>
+
+        <div class="slots-grid">
+          <div class="card-slot">
+            <label>Card Option 1</label>
+            <div class="autocomplete-wrapper">
+              <input type="text" id="slot1" class="slot-input" placeholder="e.g. Breakthrough, Pommel Strike..." autocomplete="off">
+              <div class="autocomplete-dropdown" id="dropdown1"></div>
+            </div>
+          </div>
+          <div class="card-slot">
+            <label>Card Option 2</label>
+            <div class="autocomplete-wrapper">
+              <input type="text" id="slot2" class="slot-input" placeholder="e.g. Flame Barrier, Shrug It Off..." autocomplete="off">
+              <div class="autocomplete-dropdown" id="dropdown2"></div>
+            </div>
+          </div>
+          <div class="card-slot">
+            <label>Card Option 3</label>
+            <div class="autocomplete-wrapper">
+              <input type="text" id="slot3" class="slot-input" placeholder="e.g. Inflame, True Grit..." autocomplete="off">
+              <div class="autocomplete-dropdown" id="dropdown3"></div>
+            </div>
+          </div>
+          <div class="card-slot optional-slot">
+            <label>Card Option 4 (Question Card / Mod)</label>
+            <div class="autocomplete-wrapper">
+              <input type="text" id="slot4" class="slot-input" placeholder="(Optional 4th card)..." autocomplete="off">
+              <div class="autocomplete-dropdown" id="dropdown4"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button id="btnEvaluate" class="btn-primary">
+            <span>✨</span> Evaluate Card Reward
+          </button>
+          <button id="btnClearSlots" class="btn-secondary">Clear</button>
+        </div>
+      </div>
+
+      <!-- Advice Results Area -->
+      <div id="adviceResultsArea" class="advice-results-area hidden">
+        <!-- Main Verdict Banner -->
+        <div id="verdictBanner" class="verdict-banner">
+          <div class="verdict-icon" id="verdictIcon">🏆</div>
+          <div class="verdict-text-group">
+            <div class="verdict-title" id="verdictTitle">RECOMMENDED PICK: Pommel Strike</div>
+            <div class="verdict-sub" id="verdictSub">Score: 8.2 / 10 | Solves early draw and damage needs</div>
+          </div>
+        </div>
+
+        <!-- Ranked Cards Breakdown Grid -->
+        <div class="ranked-cards-grid" id="rankedCardsGrid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DECK & RELICS -->
+    <section id="tabDeck" class="tab-pane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Active Deck & Relics</h2>
+          <p class="pane-subtitle">Live inspection of your current run's deck composition and equipped relics.</p>
+        </div>
+      </div>
+
+      <!-- Relics Bar -->
+      <div class="relics-panel">
+        <div class="section-title">
+          <span>Relics (<span id="relicCount">0</span>)</span>
+        </div>
+        <div class="relics-list" id="relicsList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Deck Categories -->
+      <div class="deck-sections-container">
+        <div class="deck-summary-bar">
+          <div class="deck-type-stat"><span class="badge red">Attacks:</span> <strong id="cntAttacks">0</strong></div>
+          <div class="deck-type-stat"><span class="badge blue">Skills:</span> <strong id="cntSkills">0</strong></div>
+          <div class="deck-type-stat"><span class="badge yellow">Powers:</span> <strong id="cntPowers">0</strong></div>
+          <div class="deck-type-stat"><span class="badge purple">Curses:</span> <strong id="cntCurses">0</strong></div>
+        </div>
+
+        <div class="deck-cards-grid" id="deckCardsGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PLAYER HISTORY & STATS -->
+    <section id="tabHistory" class="tab-pane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Personal Slay the Spire 2 Analytics</h2>
+          <p class="pane-subtitle">Mined from all 233 of your local PC run history files.</p>
+        </div>
+      </div>
+
+      <div class="stats-cards-overview">
+        <div class="stat-card">
+          <span class="stat-card-label">TOTAL RUNS</span>
+          <span class="stat-card-value" id="statTotalRuns">233</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-label">TOTAL WINS</span>
+          <span class="stat-card-value" id="statTotalWins">17</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-label">WIN RATE</span>
+          <span class="stat-card-value gold" id="statWinRate">7.3%</span>
+        </div>
+      </div>
+
+      <div class="history-grid-two">
+        <div class="history-col">
+          <h3>Character Performance</h3>
+          <div id="characterStatsList" class="character-stats-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div class="history-col">
+          <h3>Most Lethal STS2 Encounters</h3>
+          <div id="lethalEncountersList" class="lethal-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-runs-panel">
+        <h3>Recent Runs</h3>
+        <table class="recent-table">
+          <thead>
+            <tr>
+              <th>Hero</th>
+              <th>Asc</th>
+              <th>Floor</th>
+              <th>Result</th>
+              <th>Killed By</th>
+              <th>Deck Size</th>
+            </tr>
+          </thead>
+          <tbody id="recentRunsTbody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: COMPENDIUM -->
+    <section id="tabCompendium" class="tab-pane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>STS2 In-House Compendium</h2>
+          <p class="pane-subtitle">Ground-truth cards and relics extracted directly from your Slay the Spire 2 files.</p>
+        </div>
+        <div class="compendium-filters">
+          <input type="text" id="compSearch" class="search-input" placeholder="Search card or relic name...">
+          <select id="compCharFilter" class="filter-select">
+            <option value="">All Classes</option>
+            <option value="ironclad">Ironclad</option>
+            <option value="silent">Silent</option>
+            <option value="defect">Defect</option>
+            <option value="necrobinder">Necrobinder</option>
+            <option value="regent">Regent</option>
+            <option value="colorless">Colorless</option>
+            <option value="curse">Curse</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compendium-grid" id="compendiumGrid">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

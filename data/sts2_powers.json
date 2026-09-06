@@ -1,0 +1,1742 @@
+{
+  "POWER.ACCELERANT_POWER": {
+    "id": "POWER.ACCELERANT_POWER",
+    "key": "ACCELERANT_POWER",
+    "name": "Accelerant",
+    "description": "Poison is triggered an additional time."
+  },
+  "POWER.ACCURACY_POWER": {
+    "id": "POWER.ACCURACY_POWER",
+    "key": "ACCURACY_POWER",
+    "name": "Accuracy",
+    "description": "Shivs deal additional damage."
+  },
+  "POWER.ADAPTABLE_POWER": {
+    "id": "POWER.ADAPTABLE_POWER",
+    "key": "ADAPTABLE_POWER",
+    "name": "Adaptable",
+    "description": "When this creature would be defeated, it instead revives even stronger."
+  },
+  "POWER.ADAPTATION_POWER": {
+    "id": "POWER.ADAPTATION_POWER",
+    "key": "ADAPTATION_POWER",
+    "name": "Adaptation",
+    "description": "Whenever you gain Block, gain 3 Dexterity this turn."
+  },
+  "POWER.AFTERIMAGE_POWER": {
+    "id": "POWER.AFTERIMAGE_POWER",
+    "key": "AFTERIMAGE_POWER",
+    "name": "Afterimage",
+    "description": "Whenever you play a card, gain 1 Block."
+  },
+  "POWER.AGGRESSION_POWER": {
+    "id": "POWER.AGGRESSION_POWER",
+    "key": "AGGRESSION_POWER",
+    "name": "Aggression",
+    "description": "At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it for the rest of combat."
+  },
+  "POWER.ARSENAL_POWER": {
+    "id": "POWER.ARSENAL_POWER",
+    "key": "ARSENAL_POWER",
+    "name": "Arsenal",
+    "description": "Whenever you create a card, gain 1 Strength."
+  },
+  "POWER.ARTIFACT_POWER": {
+    "id": "POWER.ARTIFACT_POWER",
+    "key": "ARTIFACT_POWER",
+    "name": "Artifact",
+    "description": "Negates debuffs."
+  },
+  "POWER.ASLEEP_POWER": {
+    "id": "POWER.ASLEEP_POWER",
+    "key": "ASLEEP_POWER",
+    "name": "Asleep",
+    "description": "TODO"
+  },
+  "POWER.AUTOMATION_POWER": {
+    "id": "POWER.AUTOMATION_POWER",
+    "key": "AUTOMATION_POWER",
+    "name": "Automation",
+    "description": "Every 10 cards you draw, gain Energy."
+  },
+  "POWER.A_THOUSAND_CUTS_POWER": {
+    "id": "POWER.A_THOUSAND_CUTS_POWER",
+    "key": "A_THOUSAND_CUTS_POWER",
+    "name": "A Thousand Cuts",
+    "description": "Whenever you play a card, deal 1 damage to ALL enemies."
+  },
+  "POWER.BACK_ATTACK_LEFT_POWER": {
+    "id": "POWER.BACK_ATTACK_LEFT_POWER",
+    "key": "BACK_ATTACK_LEFT_POWER",
+    "name": "Back Attack",
+    "description": "Deals 50% more damage when it is attacking you from behind."
+  },
+  "POWER.BACK_ATTACK_RIGHT_POWER": {
+    "id": "POWER.BACK_ATTACK_RIGHT_POWER",
+    "key": "BACK_ATTACK_RIGHT_POWER",
+    "name": "Back Attack",
+    "description": "Deals 50% more damage when it is attacking you from behind."
+  },
+  "POWER.BARRICADE_POWER": {
+    "id": "POWER.BARRICADE_POWER",
+    "key": "BARRICADE_POWER",
+    "name": "Barricade",
+    "description": "Block is not removed at the start of this creature's turn."
+  },
+  "POWER.BATTLEWORN_DUMMY_TIME_LIMIT_POWER": {
+    "id": "POWER.BATTLEWORN_DUMMY_TIME_LIMIT_POWER",
+    "key": "BATTLEWORN_DUMMY_TIME_LIMIT_POWER",
+    "name": "Time Limit",
+    "description": "You have 3 more turns to defeat the Battleworn Dummy."
+  },
+  "POWER.BEACON_OF_HOPE_POWER": {
+    "id": "POWER.BEACON_OF_HOPE_POWER",
+    "key": "BEACON_OF_HOPE_POWER",
+    "name": "Beacon of Hope",
+    "description": "Whenever you gain Block on your turn, other players gain half that much Block."
+  },
+  "POWER.BIASED_COGNITION_POWER": {
+    "id": "POWER.BIASED_COGNITION_POWER",
+    "key": "BIASED_COGNITION_POWER",
+    "name": "Biased Cognition",
+    "description": "At the start of your turn, lose 1 Focus."
+  },
+  "POWER.BLACK_HOLE_POWER": {
+    "id": "POWER.BLACK_HOLE_POWER",
+    "key": "BLACK_HOLE_POWER",
+    "name": "Black Hole",
+    "description": "Whenever you spend or gain {singleStarIcon}, deal 3 damage to ALL enemies."
+  },
+  "POWER.BLOCK_NEXT_TURN_POWER": {
+    "id": "POWER.BLOCK_NEXT_TURN_POWER",
+    "key": "BLOCK_NEXT_TURN_POWER",
+    "name": "Block Next Turn",
+    "description": "At the start of your next turn, gain 4 Block."
+  },
+  "POWER.BLUR_POWER": {
+    "id": "POWER.BLUR_POWER",
+    "key": "BLUR_POWER",
+    "name": "Blur",
+    "description": "Block is not removed at the start of your next turn."
+  },
+  "POWER.BORROWED_TIME_POWER": {
+    "id": "POWER.BORROWED_TIME_POWER",
+    "key": "BORROWED_TIME_POWER",
+    "name": "Borrowed Time",
+    "description": "Cards cost an additional Energy this turn."
+  },
+  "POWER.BUFFER_POWER": {
+    "id": "POWER.BUFFER_POWER",
+    "key": "BUFFER_POWER",
+    "name": "Buffer",
+    "description": "Prevent the next time you would lose HP."
+  },
+  "POWER.BURROWED_POWER": {
+    "id": "POWER.BURROWED_POWER",
+    "key": "BURROWED_POWER",
+    "name": "Burrowed",
+    "description": "Block is not removed at the start of this creature's turn. Stunned if all Block is removed."
+  },
+  "POWER.BURST_POWER": {
+    "id": "POWER.BURST_POWER",
+    "key": "BURST_POWER",
+    "name": "Burst",
+    "description": "This turn, your next Skill is played an extra time."
+  },
+  "POWER.CALAMITY_POWER": {
+    "id": "POWER.CALAMITY_POWER",
+    "key": "CALAMITY_POWER",
+    "name": "Calamity",
+    "description": "Whenever you play an Attack, add a random Attack into your Hand."
+  },
+  "POWER.CALCIFY_POWER": {
+    "id": "POWER.CALCIFY_POWER",
+    "key": "CALCIFY_POWER",
+    "name": "Calcify",
+    "description": "Osty's attacks deal additional damage."
+  },
+  "POWER.CALL_OF_THE_VOID_POWER": {
+    "id": "POWER.CALL_OF_THE_VOID_POWER",
+    "key": "CALL_OF_THE_VOID_POWER",
+    "name": "Call of the Void",
+    "description": "At the start of your turn, add 1 random card into your Hand and apply Ethereal to it."
+  },
+  "POWER.CHAINS_OF_BINDING_POWER": {
+    "id": "POWER.CHAINS_OF_BINDING_POWER",
+    "key": "CHAINS_OF_BINDING_POWER",
+    "name": "Chains of Binding",
+    "description": "The first 3 cards drawn each turn are Afflicted with Bound."
+  },
+  "POWER.CHILD_OF_THE_STARS_POWER": {
+    "id": "POWER.CHILD_OF_THE_STARS_POWER",
+    "key": "CHILD_OF_THE_STARS_POWER",
+    "name": "Child of the Stars",
+    "description": "Gain 1 Block for each {singleStarIcon} spent."
+  },
+  "POWER.CLARITY_POWER": {
+    "id": "POWER.CLARITY_POWER",
+    "key": "CLARITY_POWER",
+    "name": "Clarity",
+    "description": "At the start of your next turn, draw 1 additional card."
+  },
+  "POWER.COLOSSUS_POWER": {
+    "id": "POWER.COLOSSUS_POWER",
+    "key": "COLOSSUS_POWER",
+    "name": "Colossus",
+    "description": "You receive 50% less damage from Vulnerable enemies this turn."
+  },
+  "POWER.CONFUSED_POWER": {
+    "id": "POWER.CONFUSED_POWER",
+    "key": "CONFUSED_POWER",
+    "name": "Confused",
+    "description": "The costs of your cards are randomized on draw, from 0 to 3."
+  },
+  "POWER.CONQUEROR_POWER": {
+    "id": "POWER.CONQUEROR_POWER",
+    "key": "CONQUEROR_POWER",
+    "name": "Conqueror",
+    "description": "Sovereign Blade deals double damage to the enemy this turn."
+  },
+  "POWER.CONSTRICT_POWER": {
+    "id": "POWER.CONSTRICT_POWER",
+    "key": "CONSTRICT_POWER",
+    "name": "Constrict",
+    "description": "While the Slithering Strangler is alive, at the end of your turn, take 1 damage."
+  },
+  "POWER.CONSUMING_SHADOW_POWER": {
+    "id": "POWER.CONSUMING_SHADOW_POWER",
+    "key": "CONSUMING_SHADOW_POWER",
+    "name": "Consuming Shadow",
+    "description": "At the end of your turn, Evoke your leftmost Orb."
+  },
+  "POWER.CONTRACTILITY_POWER": {
+    "id": "POWER.CONTRACTILITY_POWER",
+    "key": "CONTRACTILITY_POWER",
+    "name": "Contractility",
+    "description": "Next turn, gain 0 Block."
+  },
+  "POWER.COOLANT_POWER": {
+    "id": "POWER.COOLANT_POWER",
+    "key": "COOLANT_POWER",
+    "name": "Coolant",
+    "description": "At the start of your turn, gain 3 Block for each unique Orb you have."
+  },
+  "POWER.CORROSIVE_WAVE_POWER": {
+    "id": "POWER.CORROSIVE_WAVE_POWER",
+    "key": "CORROSIVE_WAVE_POWER",
+    "name": "Corrosive Wave",
+    "description": "Whenever you draw a card this turn, apply 2 Poison to ALL enemies."
+  },
+  "POWER.CORRUPTION_POWER": {
+    "id": "POWER.CORRUPTION_POWER",
+    "key": "CORRUPTION_POWER",
+    "name": "Corruption",
+    "description": "Skills cost 0.\nWhenever you play a Skill, Exhaust it."
+  },
+  "POWER.COUNTDOWN_POWER": {
+    "id": "POWER.COUNTDOWN_POWER",
+    "key": "COUNTDOWN_POWER",
+    "name": "Countdown",
+    "description": "At the start of your turn, apply 6 Doom to a random enemy."
+  },
+  "POWER.COVERED_POWER": {
+    "id": "POWER.COVERED_POWER",
+    "key": "COVERED_POWER",
+    "name": "Covered",
+    "description": "An ally is covering you. All attacks that would be directed to you are redirected to them instead."
+  },
+  "POWER.CRAB_RAGE_POWER": {
+    "id": "POWER.CRAB_RAGE_POWER",
+    "key": "CRAB_RAGE_POWER",
+    "name": "Crab Rage",
+    "description": "When an ally dies, this creature gains 5 Strength and 99 Block."
+  },
+  "POWER.CREATIVE_AI_POWER": {
+    "id": "POWER.CREATIVE_AI_POWER",
+    "key": "CREATIVE_AI_POWER",
+    "name": "Creative AI",
+    "description": "At the start of your turn, add a random Power into your Hand."
+  },
+  "POWER.CRIMSON_MANTLE_POWER": {
+    "id": "POWER.CRIMSON_MANTLE_POWER",
+    "key": "CRIMSON_MANTLE_POWER",
+    "name": "Crimson Mantle",
+    "description": "At the start of your turn, lose HP and gain Block."
+  },
+  "POWER.CRUELTY_POWER": {
+    "id": "POWER.CRUELTY_POWER",
+    "key": "CRUELTY_POWER",
+    "name": "Cruelty",
+    "description": "Vulnerable enemies take additional damage."
+  },
+  "POWER.CURIOUS_POWER": {
+    "id": "POWER.CURIOUS_POWER",
+    "key": "CURIOUS_POWER",
+    "name": "Curious",
+    "description": "Powers cost 1 1  less."
+  },
+  "POWER.CURL_UP_POWER": {
+    "id": "POWER.CURL_UP_POWER",
+    "key": "CURL_UP_POWER",
+    "name": "Curl Up",
+    "description": "When damaged, rolls up and gains block. (Once per combat)"
+  },
+  "POWER.DAMPEN_POWER": {
+    "id": "POWER.DAMPEN_POWER",
+    "key": "DAMPEN_POWER",
+    "name": "Dampen",
+    "description": "While Magi Knight is alive, ALL your cards are Downgraded."
+  },
+  "POWER.DANSE_MACABRE_POWER": {
+    "id": "POWER.DANSE_MACABRE_POWER",
+    "key": "DANSE_MACABRE_POWER",
+    "name": "Danse Macabre",
+    "description": "Whenever you play a card that costs 2 Energy or more, gain 7 Block."
+  },
+  "POWER.DARK_EMBRACE_POWER": {
+    "id": "POWER.DARK_EMBRACE_POWER",
+    "key": "DARK_EMBRACE_POWER",
+    "name": "Dark Embrace",
+    "description": "Whenever a card is Exhausted, draw 1 card."
+  },
+  "POWER.DEBILITATE_POWER": {
+    "id": "POWER.DEBILITATE_POWER",
+    "key": "DEBILITATE_POWER",
+    "name": "Debilitate",
+    "description": "Vulnerable and Weak are twice as effective for the next 2 turns."
+  },
+  "POWER.DECREE_OF_ENTROPY_POWER": {
+    "id": "POWER.DECREE_OF_ENTROPY_POWER",
+    "key": "DECREE_OF_ENTROPY_POWER",
+    "name": "Decree of Entropy",
+    "description": "At the start of your turn, add 1 random Upgraded card to your hand."
+  },
+  "POWER.DECREE_OF_UNMAKING_POWER": {
+    "id": "POWER.DECREE_OF_UNMAKING_POWER",
+    "key": "DECREE_OF_UNMAKING_POWER",
+    "name": "Decree of Unmaking",
+    "description": "Whenever you damage an enemy, apply a random debuff to it."
+  },
+  "POWER.DEMESNE_POWER": {
+    "id": "POWER.DEMESNE_POWER",
+    "key": "DEMESNE_POWER",
+    "name": "Demesne",
+    "description": "At the start of your turn, gain 1 Energy and draw 1 additional card."
+  },
+  "POWER.DEMISE_POWER": {
+    "id": "POWER.DEMISE_POWER",
+    "key": "DEMISE_POWER",
+    "name": "Demise",
+    "description": "At the end of its turn, this creature X loses HP."
+  },
+  "POWER.DEMON_FORM_POWER": {
+    "id": "POWER.DEMON_FORM_POWER",
+    "key": "DEMON_FORM_POWER",
+    "name": "Demon Form",
+    "description": "At the start of your turn, gain 2 Strength."
+  },
+  "POWER.DESPAIR_POWER": {
+    "id": "POWER.DESPAIR_POWER",
+    "key": "DESPAIR_POWER",
+    "name": "Despair",
+    "description": "For every 1 Doom you apply, gain 1 Block."
+  },
+  "POWER.DEVOUR_LIFE_POWER": {
+    "id": "POWER.DEVOUR_LIFE_POWER",
+    "key": "DEVOUR_LIFE_POWER",
+    "name": "Devour Life",
+    "description": "Whenever you play a Soul, Summon 1."
+  },
+  "POWER.DEXTERITY_DOWN_POWER": {
+    "id": "POWER.DEXTERITY_DOWN_POWER",
+    "key": "DEXTERITY_DOWN_POWER",
+    "name": "Dexterity Down",
+    "description": "At the end of this turn, lose Dexterity."
+  },
+  "POWER.DEXTERITY_POWER": {
+    "id": "POWER.DEXTERITY_POWER",
+    "key": "DEXTERITY_POWER",
+    "name": "Dexterity",
+    "description": "Dexterity improves Block gained from cards."
+  },
+  "POWER.DIAMOND_DIADEM_POWER": {
+    "id": "POWER.DIAMOND_DIADEM_POWER",
+    "key": "DIAMOND_DIADEM_POWER",
+    "name": "Diamond Diadem",
+    "description": "Enemies deal 50% less damage this turn."
+  },
+  "POWER.DIE_FOR_YOU_POWER": {
+    "id": "POWER.DIE_FOR_YOU_POWER",
+    "key": "DIE_FOR_YOU_POWER",
+    "name": "Die for You",
+    "description": "Osty absorbs all unblocked attack damage."
+  },
+  "POWER.DISINTEGRATION_POWER": {
+    "id": "POWER.DISINTEGRATION_POWER",
+    "key": "DISINTEGRATION_POWER",
+    "name": "Disintegration",
+    "description": "At the end of your turn, take 5 damage."
+  },
+  "POWER.DOOM_POWER": {
+    "id": "POWER.DOOM_POWER",
+    "key": "DOOM_POWER",
+    "name": "Doom",
+    "description": "At the end of the enemy turn, if it has at least as much Doom as HP, it dies."
+  },
+  "POWER.DOUBLE_DAMAGE_POWER": {
+    "id": "POWER.DOUBLE_DAMAGE_POWER",
+    "key": "DOUBLE_DAMAGE_POWER",
+    "name": "Double Damage",
+    "description": "This turn, Attacks deal double damage."
+  },
+  "POWER.DRAW_CARDS_NEXT_TURN_POWER": {
+    "id": "POWER.DRAW_CARDS_NEXT_TURN_POWER",
+    "key": "DRAW_CARDS_NEXT_TURN_POWER",
+    "name": "Draw Cards Next Turn",
+    "description": "At the start of your next turn, draw 1 additional card."
+  },
+  "POWER.DUPLICATION_POWER": {
+    "id": "POWER.DUPLICATION_POWER",
+    "key": "DUPLICATION_POWER",
+    "name": "Duplication",
+    "description": "Your next card is played an extra time."
+  },
+  "POWER.ECHO_FORM_POWER": {
+    "id": "POWER.ECHO_FORM_POWER",
+    "key": "ECHO_FORM_POWER",
+    "name": "Echo Form",
+    "description": "The first card you play each turn is played an extra time."
+  },
+  "POWER.ENERGY_NEXT_TURN_POWER": {
+    "id": "POWER.ENERGY_NEXT_TURN_POWER",
+    "key": "ENERGY_NEXT_TURN_POWER",
+    "name": "Energy Next Turn",
+    "description": "Gain additional Energy next turn."
+  },
+  "POWER.ENRAGE_POWER": {
+    "id": "POWER.ENRAGE_POWER",
+    "key": "ENRAGE_POWER",
+    "name": "Enrage",
+    "description": "Whenever you play a Skill, gains 2 Strength."
+  },
+  "POWER.ENTROPY_POWER": {
+    "id": "POWER.ENTROPY_POWER",
+    "key": "ENTROPY_POWER",
+    "name": "Entropy",
+    "description": "At the start of your turn, Transform 1 card in your Hand."
+  },
+  "POWER.ENVENOM_POWER": {
+    "id": "POWER.ENVENOM_POWER",
+    "key": "ENVENOM_POWER",
+    "name": "Envenom",
+    "description": "Whenever you deal unblocked attack damage, apply 1 Poison."
+  },
+  "POWER.ESCAPE_ARTIST_POWER": {
+    "id": "POWER.ESCAPE_ARTIST_POWER",
+    "key": "ESCAPE_ARTIST_POWER",
+    "name": "Escape Artist",
+    "description": "Exits the combat after 4 turns."
+  },
+  "POWER.FAN_OF_KNIVES_POWER": {
+    "id": "POWER.FAN_OF_KNIVES_POWER",
+    "key": "FAN_OF_KNIVES_POWER",
+    "name": "Fan of Knives",
+    "description": "Shivs hit ALL enemies."
+  },
+  "POWER.FASTEN_POWER": {
+    "id": "POWER.FASTEN_POWER",
+    "key": "FASTEN_POWER",
+    "name": "Fasten",
+    "description": "Gain an additional 4 Block from Defend cards."
+  },
+  "POWER.FEEL_NO_PAIN_POWER": {
+    "id": "POWER.FEEL_NO_PAIN_POWER",
+    "key": "FEEL_NO_PAIN_POWER",
+    "name": "Feel No Pain",
+    "description": "Whenever a card is Exhausted, gain 3 Block."
+  },
+  "POWER.FERAL_POWER": {
+    "id": "POWER.FERAL_POWER",
+    "key": "FERAL_POWER",
+    "name": "Feral",
+    "description": "The first time you play a 01  Attack each turn, return it to your Hand."
+  },
+  "POWER.FLAME_BARRIER_POWER": {
+    "id": "POWER.FLAME_BARRIER_POWER",
+    "key": "FLAME_BARRIER_POWER",
+    "name": "Flame Barrier",
+    "description": "Whenever you are attacked this turn, deal 4 damage back."
+  },
+  "POWER.FLANKING_POWER": {
+    "id": "POWER.FLANKING_POWER",
+    "key": "FLANKING_POWER",
+    "name": "Flanking",
+    "description": "Other allies deal 2x the attack damage to this enemy this turn."
+  },
+  "POWER.FLUTTER_POWER": {
+    "id": "POWER.FLUTTER_POWER",
+    "key": "FLUTTER_POWER",
+    "name": "Flutter",
+    "description": "Receives 50% less damage from Attacks."
+  },
+  "POWER.FOCUS_DOWN": {
+    "id": "POWER.FOCUS_DOWN",
+    "key": "FOCUS_DOWN",
+    "name": "Focus Down",
+    "description": "At the end of this turn, lose 1 Focus."
+  },
+  "POWER.FOCUS_POWER": {
+    "id": "POWER.FOCUS_POWER",
+    "key": "FOCUS_POWER",
+    "name": "Focus",
+    "description": "Increases the effectiveness of Orbs."
+  },
+  "POWER.FORBIDDEN_GRIMOIRE_POWER": {
+    "id": "POWER.FORBIDDEN_GRIMOIRE_POWER",
+    "key": "FORBIDDEN_GRIMOIRE_POWER",
+    "name": "Forbidden Grimoire",
+    "description": "At the end of combat, remove a card from your Deck."
+  },
+  "POWER.FOREGONE_CONCLUSION_POWER": {
+    "id": "POWER.FOREGONE_CONCLUSION_POWER",
+    "key": "FOREGONE_CONCLUSION_POWER",
+    "name": "Foregone Conclusion",
+    "description": "Next turn, put 3 cards from your Draw Pile into your Hand."
+  },
+  "POWER.FRAIL_POWER": {
+    "id": "POWER.FRAIL_POWER",
+    "key": "FRAIL_POWER",
+    "name": "Frail",
+    "description": "While Frail, gain 25% less Block from cards."
+  },
+  "POWER.FREE_ATTACK_POWER": {
+    "id": "POWER.FREE_ATTACK_POWER",
+    "key": "FREE_ATTACK_POWER",
+    "name": "Free Attack",
+    "description": "Your next Attack costs 0 1 ."
+  },
+  "POWER.FREE_POWER_POWER": {
+    "id": "POWER.FREE_POWER_POWER",
+    "key": "FREE_POWER_POWER",
+    "name": "Free Power",
+    "description": "The next Power you play costs 0 1 ."
+  },
+  "POWER.FREE_SKILL_POWER": {
+    "id": "POWER.FREE_SKILL_POWER",
+    "key": "FREE_SKILL_POWER",
+    "name": "Free Skill",
+    "description": "The next Skill you play costs 0 1 ."
+  },
+  "POWER.FRIENDSHIP_POWER": {
+    "id": "POWER.FRIENDSHIP_POWER",
+    "key": "FRIENDSHIP_POWER",
+    "name": "Friendship",
+    "description": "Gain 1 Energy at the start of each turn."
+  },
+  "POWER.FURNACE_POWER": {
+    "id": "POWER.FURNACE_POWER",
+    "key": "FURNACE_POWER",
+    "name": "Furnace",
+    "description": "At the start of your turn, Forge 5."
+  },
+  "POWER.GALVANIC_POWER": {
+    "id": "POWER.GALVANIC_POWER",
+    "key": "GALVANIC_POWER",
+    "name": "Galvanic",
+    "description": "Powers are afflicted with Galvanized."
+  },
+  "POWER.GENESIS_POWER": {
+    "id": "POWER.GENESIS_POWER",
+    "key": "GENESIS_POWER",
+    "name": "Genesis",
+    "description": "At the start of your turn, gain {singleStarIcon}."
+  },
+  "POWER.GIGANTIFICATION_POWER": {
+    "id": "POWER.GIGANTIFICATION_POWER",
+    "key": "GIGANTIFICATION_POWER",
+    "name": "Gigantification",
+    "description": "The next Attack you play deals triple damage."
+  },
+  "POWER.GOLDEN_PEARL": {
+    "id": "POWER.GOLDEN_PEARL",
+    "key": "GOLDEN_PEARL",
+    "name": "",
+    "description": ""
+  },
+  "POWER.GRABBED": {
+    "id": "POWER.GRABBED",
+    "key": "GRABBED",
+    "name": "Grabbed",
+    "description": "Upon killing this creature, the stolen card is returned to your hand."
+  },
+  "POWER.GRAVITY_POWER": {
+    "id": "POWER.GRAVITY_POWER",
+    "key": "GRAVITY_POWER",
+    "name": "Gravity",
+    "description": "Whenever you play a card this turn, deal 2 damage to ALL enemies."
+  },
+  "POWER.GUARDED_POWER": {
+    "id": "POWER.GUARDED_POWER",
+    "key": "GUARDED_POWER",
+    "name": "Guarded",
+    "description": "Take half damage from enemies."
+  },
+  "POWER.HAILSTORM_POWER": {
+    "id": "POWER.HAILSTORM_POWER",
+    "key": "HAILSTORM_POWER",
+    "name": "Hailstorm",
+    "description": "At the end of your turn, if you have Frost, deal 6 damage to ALL enemies."
+  },
+  "POWER.HAMMER_TIME_POWER": {
+    "id": "POWER.HAMMER_TIME_POWER",
+    "key": "HAMMER_TIME_POWER",
+    "name": "Hammer Time",
+    "description": "Whenever you Forge, all allies Forge as well."
+  },
+  "POWER.HANG_POWER": {
+    "id": "POWER.HANG_POWER",
+    "key": "HANG_POWER",
+    "name": "Hang",
+    "description": "All Hangs deal 2 times more damage to this enemy."
+  },
+  "POWER.HARDENED_SHELL_POWER": {
+    "id": "POWER.HARDENED_SHELL_POWER",
+    "key": "HARDENED_SHELL_POWER",
+    "name": "Hardened Shell",
+    "description": "This creature cannot lose more than 20 HP each turn."
+  },
+  "POWER.HARD_TO_KILL_POWER": {
+    "id": "POWER.HARD_TO_KILL_POWER",
+    "key": "HARD_TO_KILL_POWER",
+    "name": "Hard to Kill",
+    "description": "Reduce all damage taken and HP lost by Exoskeleton to 9."
+  },
+  "POWER.HATCH_POWER": {
+    "id": "POWER.HATCH_POWER",
+    "key": "HATCH_POWER",
+    "name": "Hatch",
+    "description": "Hatches after X turns."
+  },
+  "POWER.HAUNT_POWER": {
+    "id": "POWER.HAUNT_POWER",
+    "key": "HAUNT_POWER",
+    "name": "Haunt",
+    "description": "Whenever you play a Soul, a random enemy loses 3 HP."
+  },
+  "POWER.HEATSINKS_POWER": {
+    "id": "POWER.HEATSINKS_POWER",
+    "key": "HEATSINKS_POWER",
+    "name": "Heatsink",
+    "description": "Whenever you play a Power, draw 1 card."
+  },
+  "POWER.HEIST_POWER": {
+    "id": "POWER.HEIST_POWER",
+    "key": "HEIST_POWER",
+    "name": "Heist",
+    "description": "When killed, returns all the stolen Gold."
+  },
+  "POWER.HELLO_WORLD_POWER": {
+    "id": "POWER.HELLO_WORLD_POWER",
+    "key": "HELLO_WORLD_POWER",
+    "name": "Hello World",
+    "description": "At the start of your turn, add 1 random Common card into your Hand."
+  },
+  "POWER.HELLRAISER_POWER": {
+    "id": "POWER.HELLRAISER_POWER",
+    "key": "HELLRAISER_POWER",
+    "name": "Hellraiser",
+    "description": "Whenever you draw a card containing \"Strike\", it is played against a random enemy."
+  },
+  "POWER.HEX_POWER": {
+    "id": "POWER.HEX_POWER",
+    "key": "HEX_POWER",
+    "name": "Hex",
+    "description": "While Spectral Knight is alive, ALL your cards are Ethereal."
+  },
+  "POWER.HIGH_VOLTAGE_POWER": {
+    "id": "POWER.HIGH_VOLTAGE_POWER",
+    "key": "HIGH_VOLTAGE_POWER",
+    "name": "High Voltage",
+    "description": "At the end of this creature's turn, it gains 2 Strength."
+  },
+  "POWER.ILLUSION_POWER": {
+    "id": "POWER.ILLUSION_POWER",
+    "key": "ILLUSION_POWER",
+    "name": "Illusion",
+    "description": "When this dies, it revives next turn at full HP."
+  },
+  "POWER.IMBALANCED_POWER": {
+    "id": "POWER.IMBALANCED_POWER",
+    "key": "IMBALANCED_POWER",
+    "name": "Imbalanced",
+    "description": "If this creature's attacks are fully blocked by any player, it becomes Stunned."
+  },
+  "POWER.IMPROVEMENT_POWER": {
+    "id": "POWER.IMPROVEMENT_POWER",
+    "key": "IMPROVEMENT_POWER",
+    "name": "Improvement",
+    "description": "At the end of combat, Upgrade a random card."
+  },
+  "POWER.INFERNO_POWER": {
+    "id": "POWER.INFERNO_POWER",
+    "key": "INFERNO_POWER",
+    "name": "Inferno",
+    "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 4 damage to ALL enemies."
+  },
+  "POWER.INFESTED_POWER": {
+    "id": "POWER.INFESTED_POWER",
+    "key": "INFESTED_POWER",
+    "name": "Infested",
+    "description": "Upon dying, summons... something."
+  },
+  "POWER.INFINITE_BLADES_POWER": {
+    "id": "POWER.INFINITE_BLADES_POWER",
+    "key": "INFINITE_BLADES_POWER",
+    "name": "Infinite Blades",
+    "description": "At the start of your turn, add a Shiv into your Hand."
+  },
+  "POWER.INKED": {
+    "id": "POWER.INKED",
+    "key": "INKED",
+    "name": "Inked",
+    "description": "This creature takes 2 additional damage from Attacks."
+  },
+  "POWER.INTANGIBLE_POWER": {
+    "id": "POWER.INTANGIBLE_POWER",
+    "key": "INTANGIBLE_POWER",
+    "name": "Intangible",
+    "description": "Reduce all damage taken and HP loss to 1 this turn."
+  },
+  "POWER.INTERCEPT_POWER": {
+    "id": "POWER.INTERCEPT_POWER",
+    "key": "INTERCEPT_POWER",
+    "name": "Intercept",
+    "description": "You are covering another player. All attacks that would be directed towards them are redirected towards you."
+  },
+  "POWER.ITERATION_POWER": {
+    "id": "POWER.ITERATION_POWER",
+    "key": "ITERATION_POWER",
+    "name": "Iteration",
+    "description": "The first time you draw a Status each turn, draw more cards."
+  },
+  "POWER.JUGGERNAUT_POWER": {
+    "id": "POWER.JUGGERNAUT_POWER",
+    "key": "JUGGERNAUT_POWER",
+    "name": "Juggernaut",
+    "description": "Whenever you gain Block, deal 6 damage to a random enemy."
+  },
+  "POWER.JUGGLING_POWER": {
+    "id": "POWER.JUGGLING_POWER",
+    "key": "JUGGLING_POWER",
+    "name": "Juggling",
+    "description": "Add a copy of the third Attack you play each turn into your Hand."
+  },
+  "POWER.KNOCKDOWN_POWER": {
+    "id": "POWER.KNOCKDOWN_POWER",
+    "key": "KNOCKDOWN_POWER",
+    "name": "Knockdown",
+    "description": "This creature takes {Amount} times the damage from other players this turn."
+  },
+  "POWER.LEADERSHIP_POWER": {
+    "id": "POWER.LEADERSHIP_POWER",
+    "key": "LEADERSHIP_POWER",
+    "name": "Leadership",
+    "description": "All other allies deal 1 additional damage."
+  },
+  "POWER.LETHALITY_POWER": {
+    "id": "POWER.LETHALITY_POWER",
+    "key": "LETHALITY_POWER",
+    "name": "Lethality",
+    "description": "The first Attack each turn deals 50% additional damage."
+  },
+  "POWER.LIGHTNING_ROD_POWER": {
+    "id": "POWER.LIGHTNING_ROD_POWER",
+    "key": "LIGHTNING_ROD_POWER",
+    "name": "Lightning Rod",
+    "description": "At the start of the next 2 turns, Channel 1 Lightning."
+  },
+  "POWER.LOOP_POWER": {
+    "id": "POWER.LOOP_POWER",
+    "key": "LOOP_POWER",
+    "name": "Loop",
+    "description": "At the start of your turn, trigger the passive ability of your next Orb."
+  },
+  "POWER.MACHINE_LEARNING_POWER": {
+    "id": "POWER.MACHINE_LEARNING_POWER",
+    "key": "MACHINE_LEARNING_POWER",
+    "name": "Machine Learning",
+    "description": "At the start of your turn, draw 1 additional card."
+  },
+  "POWER.MAGIC_BOMB_POWER": {
+    "id": "POWER.MAGIC_BOMB_POWER",
+    "key": "MAGIC_BOMB_POWER",
+    "name": "Magic Bomb",
+    "description": "Take 20 damage at the end of your turn. Is cleared if the Magi Knight dies."
+  },
+  "POWER.MASTER_PLANNER_POWER": {
+    "id": "POWER.MASTER_PLANNER_POWER",
+    "key": "MASTER_PLANNER_POWER",
+    "name": "Master Planner",
+    "description": "When you play a Skill, it gains Sly."
+  },
+  "POWER.MAYHEM_POWER": {
+    "id": "POWER.MAYHEM_POWER",
+    "key": "MAYHEM_POWER",
+    "name": "Mayhem",
+    "description": "At the start of your turn, play the top card of your Draw Pile."
+  },
+  "POWER.MELANCHOLY_POWER": {
+    "id": "POWER.MELANCHOLY_POWER",
+    "key": "MELANCHOLY_POWER",
+    "name": "Melancholy",
+    "description": "Whenever Doom is applied, apply an additional 2."
+  },
+  "POWER.MIND_ROT_POWER": {
+    "id": "POWER.MIND_ROT_POWER",
+    "key": "MIND_ROT_POWER",
+    "name": "Mind Rot",
+    "description": "Draw 1 fewer card each turn."
+  },
+  "POWER.MINION_POWER": {
+    "id": "POWER.MINION_POWER",
+    "key": "MINION_POWER",
+    "name": "Minion",
+    "description": "Minions abandon combat without their leader."
+  },
+  "POWER.MOCK_CLONE_CARDS_ON_PLAY_POWER": {
+    "id": "POWER.MOCK_CLONE_CARDS_ON_PLAY_POWER",
+    "key": "MOCK_CLONE_CARDS_ON_PLAY_POWER",
+    "name": "Mock Clone Cards on Play",
+    "description": ""
+  },
+  "POWER.MOCK_DO_NOT_SCALE_IN_MULTIPLAYER_POWER": {
+    "id": "POWER.MOCK_DO_NOT_SCALE_IN_MULTIPLAYER_POWER",
+    "key": "MOCK_DO_NOT_SCALE_IN_MULTIPLAYER_POWER",
+    "name": "Mock Do Not Scale in Multiplayer",
+    "description": ""
+  },
+  "POWER.MOCK_EXTRA_TURN_POWER": {
+    "id": "POWER.MOCK_EXTRA_TURN_POWER",
+    "key": "MOCK_EXTRA_TURN_POWER",
+    "name": "Mock Extra Turn",
+    "description": ""
+  },
+  "POWER.MOCK_FREE_CARDS_POWER": {
+    "id": "POWER.MOCK_FREE_CARDS_POWER",
+    "key": "MOCK_FREE_CARDS_POWER",
+    "name": "Mock Free Cards",
+    "description": ""
+  },
+  "POWER.MOCK_GAIN_BLOCK_ON_ATTACK_POWER": {
+    "id": "POWER.MOCK_GAIN_BLOCK_ON_ATTACK_POWER",
+    "key": "MOCK_GAIN_BLOCK_ON_ATTACK_POWER",
+    "name": "Mock Gain Block on Attack",
+    "description": ""
+  },
+  "POWER.MOCK_INVINCIBLE_ON_DEATH_POWER": {
+    "id": "POWER.MOCK_INVINCIBLE_ON_DEATH_POWER",
+    "key": "MOCK_INVINCIBLE_ON_DEATH_POWER",
+    "name": "Mock Invincible on Death",
+    "description": ""
+  },
+  "POWER.MOCK_MODIFY_ENERGY_COST_POWER": {
+    "id": "POWER.MOCK_MODIFY_ENERGY_COST_POWER",
+    "key": "MOCK_MODIFY_ENERGY_COST_POWER",
+    "name": "Mock Modify Energy Cost",
+    "description": ""
+  },
+  "POWER.MOCK_MODIFY_STAR_COST_POWER": {
+    "id": "POWER.MOCK_MODIFY_STAR_COST_POWER",
+    "key": "MOCK_MODIFY_STAR_COST_POWER",
+    "name": "Mock Modify Star Cost",
+    "description": ""
+  },
+  "POWER.MOCK_PHASE_OBSERVER_POWER": {
+    "id": "POWER.MOCK_PHASE_OBSERVER_POWER",
+    "key": "MOCK_PHASE_OBSERVER_POWER",
+    "name": "Mock Phase Observer",
+    "description": ""
+  },
+  "POWER.MOCK_PREVENT_DEATH_POWER": {
+    "id": "POWER.MOCK_PREVENT_DEATH_POWER",
+    "key": "MOCK_PREVENT_DEATH_POWER",
+    "name": "Mock Prevent Death",
+    "description": ""
+  },
+  "POWER.MOCK_REMOVE_DRAWN_CARDS_FROM_COMBAT_POWER": {
+    "id": "POWER.MOCK_REMOVE_DRAWN_CARDS_FROM_COMBAT_POWER",
+    "key": "MOCK_REMOVE_DRAWN_CARDS_FROM_COMBAT_POWER",
+    "name": "Mock Remove Drawn Cards from Combat",
+    "description": ""
+  },
+  "POWER.MOCK_RESET_COMBAT_ON_SHUFFLE_POWER": {
+    "id": "POWER.MOCK_RESET_COMBAT_ON_SHUFFLE_POWER",
+    "key": "MOCK_RESET_COMBAT_ON_SHUFFLE_POWER",
+    "name": "Mock Reset Combat on Shuffle",
+    "description": ""
+  },
+  "POWER.MOCK_REVIVE_POWER": {
+    "id": "POWER.MOCK_REVIVE_POWER",
+    "key": "MOCK_REVIVE_POWER",
+    "name": "Mock Revive",
+    "description": ""
+  },
+  "POWER.MOCK_SCALE_IN_MULTIPLAYER_POWER": {
+    "id": "POWER.MOCK_SCALE_IN_MULTIPLAYER_POWER",
+    "key": "MOCK_SCALE_IN_MULTIPLAYER_POWER",
+    "name": "Mock Scale in Multiplayer",
+    "description": ""
+  },
+  "POWER.MOCK_TEMPORARY_STRENGTH_LOSS": {
+    "id": "POWER.MOCK_TEMPORARY_STRENGTH_LOSS",
+    "key": "MOCK_TEMPORARY_STRENGTH_LOSS",
+    "name": "Mock Temporary Strength Loss",
+    "description": ""
+  },
+  "POWER.MOCK_UNHITTABLE_POWER": {
+    "id": "POWER.MOCK_UNHITTABLE_POWER",
+    "key": "MOCK_UNHITTABLE_POWER",
+    "name": "Mock Unhittable",
+    "description": ""
+  },
+  "POWER.MONARCHS_GAZE_POWER": {
+    "id": "POWER.MONARCHS_GAZE_POWER",
+    "key": "MONARCHS_GAZE_POWER",
+    "name": "Monarch's Gaze",
+    "description": "Whenever you attack an enemy, it loses 1 Strength this turn."
+  },
+  "POWER.MONOLOGUE_POWER": {
+    "id": "POWER.MONOLOGUE_POWER",
+    "key": "MONOLOGUE_POWER",
+    "name": "Monologue",
+    "description": "Whenever you play a card this turn, gain 1 Strength this turn."
+  },
+  "POWER.NECRO_MASTERY_POWER": {
+    "id": "POWER.NECRO_MASTERY_POWER",
+    "key": "NECRO_MASTERY_POWER",
+    "name": "Necro Mastery",
+    "description": "Whenever Osty loses HP, ALL enemies lose that much HP as well."
+  },
+  "POWER.NEMESIS_POWER": {
+    "id": "POWER.NEMESIS_POWER",
+    "key": "NEMESIS_POWER",
+    "name": "Nemesis",
+    "description": "At the end of every other turn, gains Intangible 1."
+  },
+  "POWER.NEUROSURGE_POWER": {
+    "id": "POWER.NEUROSURGE_POWER",
+    "key": "NEUROSURGE_POWER",
+    "name": "Neurosurge",
+    "description": "At the start of your turn, apply 3 Doom to yourself."
+  },
+  "POWER.NIGHTMARE_POWER": {
+    "id": "POWER.NIGHTMARE_POWER",
+    "key": "NIGHTMARE_POWER",
+    "name": "Nightmare",
+    "description": "Add 3 of a chosen card into your Hand next turn."
+  },
+  "POWER.NOSTALGIA_POWER": {
+    "id": "POWER.NOSTALGIA_POWER",
+    "key": "NOSTALGIA_POWER",
+    "name": "Nostalgia",
+    "description": "The first Attack or Skill you play each turn is placed on top of your Draw Pile."
+  },
+  "POWER.NOXIOUS_FUMES_POWER": {
+    "id": "POWER.NOXIOUS_FUMES_POWER",
+    "key": "NOXIOUS_FUMES_POWER",
+    "name": "Noxious Fumes",
+    "description": "At the start of your turn, apply 2 Poison to ALL enemies."
+  },
+  "POWER.NO_BLOCK_POWER": {
+    "id": "POWER.NO_BLOCK_POWER",
+    "key": "NO_BLOCK_POWER",
+    "name": "No Block",
+    "description": "You cannot gain Block from cards."
+  },
+  "POWER.NO_DRAW_POWER": {
+    "id": "POWER.NO_DRAW_POWER",
+    "key": "NO_DRAW_POWER",
+    "name": "No Draw",
+    "description": "You may not draw any more cards this turn."
+  },
+  "POWER.NO_ENERGY_GAIN_POWER": {
+    "id": "POWER.NO_ENERGY_GAIN_POWER",
+    "key": "NO_ENERGY_GAIN_POWER",
+    "name": "No Energy Gain",
+    "description": "You cannot gain additional 1  this turn."
+  },
+  "POWER.NO_ESCAPE_POWER": {
+    "id": "POWER.NO_ESCAPE_POWER",
+    "key": "NO_ESCAPE_POWER",
+    "name": "No Escape",
+    "description": "At the end of 3 turns, gains 50 Doom."
+  },
+  "POWER.OBLIVION_POWER": {
+    "id": "POWER.OBLIVION_POWER",
+    "key": "OBLIVION_POWER",
+    "name": "Oblivion",
+    "description": "Whenever you play a card, this enemy gains 1 Doom."
+  },
+  "POWER.ONE_TWO_PUNCH_POWER": {
+    "id": "POWER.ONE_TWO_PUNCH_POWER",
+    "key": "ONE_TWO_PUNCH_POWER",
+    "name": "One-Two Punch",
+    "description": "Your next Attack is played an extra time this turn."
+  },
+  "POWER.ORBIT_POWER": {
+    "id": "POWER.ORBIT_POWER",
+    "key": "ORBIT_POWER",
+    "name": "Orbit",
+    "description": "Every 4 Energy you spend, gain an Energy."
+  },
+  "POWER.ORB_GENERATOR": {
+    "id": "POWER.ORB_GENERATOR",
+    "key": "ORB_GENERATOR",
+    "name": "Orb Generator",
+    "description": "This enemy can harness the power of Orbs. Orbs will trigger at the end of your turn and are unaffected by buffs or debuffs."
+  },
+  "POWER.OUTBREAK_POWER": {
+    "id": "POWER.OUTBREAK_POWER",
+    "key": "OUTBREAK_POWER",
+    "name": "Outbreak",
+    "description": "Every 10 times you apply Poison, deal damage to ALL enemies."
+  },
+  "POWER.PAGESTORM_POWER": {
+    "id": "POWER.PAGESTORM_POWER",
+    "key": "PAGESTORM_POWER",
+    "name": "Pagestorm",
+    "description": "Whenever you draw an Ethereal card, draw 1 card."
+  },
+  "POWER.PAINFUL_STABS_POWER": {
+    "id": "POWER.PAINFUL_STABS_POWER",
+    "key": "PAINFUL_STABS_POWER",
+    "name": "Painful Stabs",
+    "description": "Shuffle 1 Wound into your Discard Pile each time you receive unblocked attack damage."
+  },
+  "POWER.PALE_BLUE_DOT_POWER": {
+    "id": "POWER.PALE_BLUE_DOT_POWER",
+    "key": "PALE_BLUE_DOT_POWER",
+    "name": "Pale Blue Dot",
+    "description": "If you play enough cards in a turn, draw additional cards at the start of your next turn."
+  },
+  "POWER.PANACHE_POWER": {
+    "id": "POWER.PANACHE_POWER",
+    "key": "PANACHE_POWER",
+    "name": "Panache",
+    "description": "If you play 5 cards this turn, deal damage to ALL enemies."
+  },
+  "POWER.PAPER_CUTS_POWER": {
+    "id": "POWER.PAPER_CUTS_POWER",
+    "key": "PAPER_CUTS_POWER",
+    "name": "Paper Cuts",
+    "description": "Whenever this creature deals unblocked attack damage to you, you lose 1 Max HP."
+  },
+  "POWER.PARRY_POWER": {
+    "id": "POWER.PARRY_POWER",
+    "key": "PARRY_POWER",
+    "name": "Parry",
+    "description": "Sovereign Blade now gains Block."
+  },
+  "POWER.PERSONAL_HIVE_POWER": {
+    "id": "POWER.PERSONAL_HIVE_POWER",
+    "key": "PERSONAL_HIVE_POWER",
+    "name": "Personal Hive",
+    "description": "Whenever this enemy is hit by an Attack, add Dazed into your Draw Pile."
+  },
+  "POWER.PHANTOM_BLADES_POWER": {
+    "id": "POWER.PHANTOM_BLADES_POWER",
+    "key": "PHANTOM_BLADES_POWER",
+    "name": "Phantom Blades",
+    "description": "Shivs gain Retain.\nThe first Shiv you play each turn deals 9 additional damage."
+  },
+  "POWER.PILLAR_OF_CREATION_POWER": {
+    "id": "POWER.PILLAR_OF_CREATION_POWER",
+    "key": "PILLAR_OF_CREATION_POWER",
+    "name": "Pillar of Creation",
+    "description": "Whenever you create a card, gain 5 Block."
+  },
+  "POWER.PLATING_POWER": {
+    "id": "POWER.PLATING_POWER",
+    "key": "PLATING_POWER",
+    "name": "Plating",
+    "description": "At the end of your turn, gain Block. Plating is reduced by 1 at the start of your turn."
+  },
+  "POWER.PLOW_POWER": {
+    "id": "POWER.PLOW_POWER",
+    "key": "PLOW_POWER",
+    "name": "Plow",
+    "description": "The first time this creature's HP reaches 150 or below, it becomes Stunned."
+  },
+  "POWER.POISON_POWER": {
+    "id": "POWER.POISON_POWER",
+    "key": "POISON_POWER",
+    "name": "Poison",
+    "description": "Poisoned creatures lose HP at the start of their turn. Each turn, Poison is reduced by 1."
+  },
+  "POWER.POSSESS_SPEED_POWER": {
+    "id": "POWER.POSSESS_SPEED_POWER",
+    "key": "POSSESS_SPEED_POWER",
+    "name": "Possess Speed",
+    "description": "When killed, return all stolen Dexterity to the player."
+  },
+  "POWER.POSSESS_STRENGTH_POWER": {
+    "id": "POWER.POSSESS_STRENGTH_POWER",
+    "key": "POSSESS_STRENGTH_POWER",
+    "name": "Possess Strength",
+    "description": "When killed, return all stolen Strength to the player."
+  },
+  "POWER.PREP_TIME_POWER": {
+    "id": "POWER.PREP_TIME_POWER",
+    "key": "PREP_TIME_POWER",
+    "name": "Prep Time",
+    "description": "At the start of your turn, gain 4 Vigor."
+  },
+  "POWER.PYRE_POWER": {
+    "id": "POWER.PYRE_POWER",
+    "key": "PYRE_POWER",
+    "name": "Pyre",
+    "description": "Gain 1 Energy at the start of each turn."
+  },
+  "POWER.RADIANCE_POWER": {
+    "id": "POWER.RADIANCE_POWER",
+    "key": "RADIANCE_POWER",
+    "name": "Radiance",
+    "description": "Gain an additional Energy next turn."
+  },
+  "POWER.RAGE_POWER": {
+    "id": "POWER.RAGE_POWER",
+    "key": "RAGE_POWER",
+    "name": "Rage",
+    "description": "Whenever you play an Attack this turn, gain 3 Block."
+  },
+  "POWER.RAMPART_POWER": {
+    "id": "POWER.RAMPART_POWER",
+    "key": "RAMPART_POWER",
+    "name": "Rampart",
+    "description": "At the start of the player's turn, Turret Operator gains 25 Block."
+  },
+  "POWER.RAVENOUS_POWER": {
+    "id": "POWER.RAVENOUS_POWER",
+    "key": "RAVENOUS_POWER",
+    "name": "Ravenous",
+    "description": "When an enemy dies, Corpse Slug immediately eats it, becoming Stunned and gaining 1 Strength."
+  },
+  "POWER.READ_THE_BONES_POWER": {
+    "id": "POWER.READ_THE_BONES_POWER",
+    "key": "READ_THE_BONES_POWER",
+    "name": "Read the Bones",
+    "description": "Whenever you Summon, draw 1 card."
+  },
+  "POWER.REAPER_FORM_POWER": {
+    "id": "POWER.REAPER_FORM_POWER",
+    "key": "REAPER_FORM_POWER",
+    "name": "Reaper Form",
+    "description": "Whenever Attacks deal damage, apply that much Doom."
+  },
+  "POWER.REATTACH_POWER": {
+    "id": "POWER.REATTACH_POWER",
+    "key": "REATTACH_POWER",
+    "name": "Reattach",
+    "description": "If other segments are still alive, revives in 2 turns with 25 HP."
+  },
+  "POWER.REBOUND_POWER": {
+    "id": "POWER.REBOUND_POWER",
+    "key": "REBOUND_POWER",
+    "name": "Rebound",
+    "description": "The next card you play this turn is placed on the top of your Draw Pile."
+  },
+  "POWER.REFLECTIVE_FORTRESS_POWER": {
+    "id": "POWER.REFLECTIVE_FORTRESS_POWER",
+    "key": "REFLECTIVE_FORTRESS_POWER",
+    "name": "Reflective Fortress",
+    "description": "Whenever you fully Block an attack, the blocked damage is reflected to the attacker."
+  },
+  "POWER.REFLECT_POWER": {
+    "id": "POWER.REFLECT_POWER",
+    "key": "REFLECT_POWER",
+    "name": "Reflect",
+    "description": "Blocked damage is reflected to your attacker."
+  },
+  "POWER.REGEN_POWER": {
+    "id": "POWER.REGEN_POWER",
+    "key": "REGEN_POWER",
+    "name": "Regen",
+    "description": "Regen heals HP at the end of your turn. Each turn, Regen is reduced by 1."
+  },
+  "POWER.RESERVES_POWER": {
+    "id": "POWER.RESERVES_POWER",
+    "key": "RESERVES_POWER",
+    "name": "Reserves",
+    "description": "If you don't have enough Energy for a card, 2{singleStarIcon} are used per Energy instead."
+  },
+  "POWER.RESTORE_DEXTERITY": {
+    "id": "POWER.RESTORE_DEXTERITY",
+    "key": "RESTORE_DEXTERITY",
+    "name": "Restore Dexterity",
+    "description": "At the end of its turn, gains 9 Dexterity."
+  },
+  "POWER.RESTORE_FOCUS": {
+    "id": "POWER.RESTORE_FOCUS",
+    "key": "RESTORE_FOCUS",
+    "name": "Restore Focus",
+    "description": "At the end of its turn, gains 9 Focus."
+  },
+  "POWER.RETAIN_HAND_POWER": {
+    "id": "POWER.RETAIN_HAND_POWER",
+    "key": "RETAIN_HAND_POWER",
+    "name": "Retain Hand",
+    "description": "Retain your Hand for the next 2 turns."
+  },
+  "POWER.RINGING_POWER": {
+    "id": "POWER.RINGING_POWER",
+    "key": "RINGING_POWER",
+    "name": "Ringing",
+    "description": "You can only play 1 card this turn."
+  },
+  "POWER.RITUAL_POWER": {
+    "id": "POWER.RITUAL_POWER",
+    "key": "RITUAL_POWER",
+    "name": "Ritual",
+    "description": "Gain Strength at the end of your turn."
+  },
+  "POWER.ROLLING_BOULDER_POWER": {
+    "id": "POWER.ROLLING_BOULDER_POWER",
+    "key": "ROLLING_BOULDER_POWER",
+    "name": "Rolling Boulder",
+    "description": "At the start of your turn, deal 5 damage to ALL enemies and increase this damage by 5."
+  },
+  "POWER.ROYALTIES_POWER": {
+    "id": "POWER.ROYALTIES_POWER",
+    "key": "ROYALTIES_POWER",
+    "name": "Royalties",
+    "description": "At the end of combat, gain 25 Gold."
+  },
+  "POWER.RUPTURE_POWER": {
+    "id": "POWER.RUPTURE_POWER",
+    "key": "RUPTURE_POWER",
+    "name": "Rupture",
+    "description": "Whenever you lose HP on your turn, gain 1 Strength."
+  },
+  "POWER.SANDPIT_POWER": {
+    "id": "POWER.SANDPIT_POWER",
+    "key": "SANDPIT_POWER",
+    "name": "Sandpit",
+    "description": "A power used by The Insatiable."
+  },
+  "POWER.SEEKING_EDGE_POWER": {
+    "id": "POWER.SEEKING_EDGE_POWER",
+    "key": "SEEKING_EDGE_POWER",
+    "name": "Seeking Edge",
+    "description": "Sovereign Blade now hits ALL enemies."
+  },
+  "POWER.SELF_FORMING_CLAY_POWER": {
+    "id": "POWER.SELF_FORMING_CLAY_POWER",
+    "key": "SELF_FORMING_CLAY_POWER",
+    "name": "Self-Forming Clay",
+    "description": "Gain 3 Block next turn."
+  },
+  "POWER.SENTRY_MODE_POWER": {
+    "id": "POWER.SENTRY_MODE_POWER",
+    "key": "SENTRY_MODE_POWER",
+    "name": "Sentry Mode",
+    "description": "At the start of your turn, add 1 Sweeping Gaze into your Hand."
+  },
+  "POWER.SERPENT_FORM_POWER": {
+    "id": "POWER.SERPENT_FORM_POWER",
+    "key": "SERPENT_FORM_POWER",
+    "name": "Serpent Form",
+    "description": "Whenever you play a card, deal 4 damage to a random enemy."
+  },
+  "POWER.SHADOWMELD_POWER": {
+    "id": "POWER.SHADOWMELD_POWER",
+    "key": "SHADOWMELD_POWER",
+    "name": "Shadowmeld",
+    "description": "Double your Block gain this turn."
+  },
+  "POWER.SHADOW_STEP_POWER": {
+    "id": "POWER.SHADOW_STEP_POWER",
+    "key": "SHADOW_STEP_POWER",
+    "name": "Shadow Step",
+    "description": "Next turn, Attacks deal double damage."
+  },
+  "POWER.SHARP_EDGE_POWER": {
+    "id": "POWER.SHARP_EDGE_POWER",
+    "key": "SHARP_EDGE_POWER",
+    "name": "Sharp Edge",
+    "description": "Whenever you create a Shiv, Upgrade it."
+  },
+  "POWER.SHRIEK_POWER": {
+    "id": "POWER.SHRIEK_POWER",
+    "key": "SHRIEK_POWER",
+    "name": "Shriek",
+    "description": "The first time this creature's HP reaches 50% or below, it becomes Stunned."
+  },
+  "POWER.SHRINK_POWER": {
+    "id": "POWER.SHRINK_POWER",
+    "key": "SHRINK_POWER",
+    "name": "Shrink",
+    "description": "This creature's Attacks deal 30% less damage for the next 3 turns."
+  },
+  "POWER.SHROUD_POWER": {
+    "id": "POWER.SHROUD_POWER",
+    "key": "SHROUD_POWER",
+    "name": "Shroud",
+    "description": "Whenever you apply Doom, gain 3 Block."
+  },
+  "POWER.SIC_EM_POWER": {
+    "id": "POWER.SIC_EM_POWER",
+    "key": "SIC_EM_POWER",
+    "name": "Sic 'Em",
+    "description": "Whenever Osty hits this enemy this turn, Summon 3."
+  },
+  "POWER.SIGNAL_BOOST_POWER": {
+    "id": "POWER.SIGNAL_BOOST_POWER",
+    "key": "SIGNAL_BOOST_POWER",
+    "name": "Signal Boost",
+    "description": "Your next Power is played an extra time."
+  },
+  "POWER.SKITTISH_POWER": {
+    "id": "POWER.SKITTISH_POWER",
+    "key": "SKITTISH_POWER",
+    "name": "Skittish",
+    "description": "The first time this creature is hit each turn, it gains 1 Block."
+  },
+  "POWER.SLEIGHT_OF_FLESH_POWER": {
+    "id": "POWER.SLEIGHT_OF_FLESH_POWER",
+    "key": "SLEIGHT_OF_FLESH_POWER",
+    "name": "Sleight of Flesh",
+    "description": "Whenever you apply a debuff to an enemy, they take 13 damage."
+  },
+  "POWER.SLIPPERY_POWER": {
+    "id": "POWER.SLIPPERY_POWER",
+    "key": "SLIPPERY_POWER",
+    "name": "Slippery",
+    "description": "The next time this creature loses HP, it only loses 1 HP instead."
+  },
+  "POWER.SLOTH_POWER": {
+    "id": "POWER.SLOTH_POWER",
+    "key": "SLOTH_POWER",
+    "name": "Sloth",
+    "description": "You cannot play more than 3 cards each turn."
+  },
+  "POWER.SLOW_POWER": {
+    "id": "POWER.SLOW_POWER",
+    "key": "SLOW_POWER",
+    "name": "Slow",
+    "description": "Whenever you play a card, this enemy receives 10% more damage from Attacks this turn."
+  },
+  "POWER.SLUMBER_POWER": {
+    "id": "POWER.SLUMBER_POWER",
+    "key": "SLUMBER_POWER",
+    "name": "Slumber",
+    "description": "Awakens upon taking turns or losing HP 3 times."
+  },
+  "POWER.SMOGGY_POWER": {
+    "id": "POWER.SMOGGY_POWER",
+    "key": "SMOGGY_POWER",
+    "name": "Smoggy",
+    "description": "You can only play 1 Skill per turn."
+  },
+  "POWER.SMOKESTACK_POWER": {
+    "id": "POWER.SMOKESTACK_POWER",
+    "key": "SMOKESTACK_POWER",
+    "name": "Smokestack",
+    "description": "Whenever you create a Status, deal damage to ALL enemies."
+  },
+  "POWER.SNEAKY_POWER": {
+    "id": "POWER.SNEAKY_POWER",
+    "key": "SNEAKY_POWER",
+    "name": "Sneaky",
+    "description": "Whenever another player attacks an enemy, gain Block."
+  },
+  "POWER.SOAR_POWER": {
+    "id": "POWER.SOAR_POWER",
+    "key": "SOAR_POWER",
+    "name": "Soar",
+    "description": "Receives 50% less attack damage until it lands."
+  },
+  "POWER.SOUL_WITHER": {
+    "id": "POWER.SOUL_WITHER",
+    "key": "SOUL_WITHER",
+    "name": "Soul Wither",
+    "description": "After Soul Nexus deals unblocked attack damage to you 9 times, it deals 999 damage to you."
+  },
+  "POWER.SOW_POWER": {
+    "id": "POWER.SOW_POWER",
+    "key": "SOW_POWER",
+    "name": "Sow",
+    "description": "Retain 1 random card in your Hand this turn."
+  },
+  "POWER.SPECTRUM_SHIFT_POWER": {
+    "id": "POWER.SPECTRUM_SHIFT_POWER",
+    "key": "SPECTRUM_SHIFT_POWER",
+    "name": "Spectrum Shift",
+    "description": "At the start of your turn, add 1 random Colorless card into your Hand."
+  },
+  "POWER.SPEEDSTER_POWER": {
+    "id": "POWER.SPEEDSTER_POWER",
+    "key": "SPEEDSTER_POWER",
+    "name": "Speedster",
+    "description": "Whenever you draw a card during your turn, deal 1 damage to ALL enemies."
+  },
+  "POWER.SPINNER_POWER": {
+    "id": "POWER.SPINNER_POWER",
+    "key": "SPINNER_POWER",
+    "name": "Spinner",
+    "description": "At the start of your turn, Channel 1 Glass."
+  },
+  "POWER.SPIRIT_OF_ASH_POWER": {
+    "id": "POWER.SPIRIT_OF_ASH_POWER",
+    "key": "SPIRIT_OF_ASH_POWER",
+    "name": "Spirit of Ash",
+    "description": "Whenever you play an Ethereal card, gain 4 Block."
+  },
+  "POWER.STAMPEDE_POWER": {
+    "id": "POWER.STAMPEDE_POWER",
+    "key": "STAMPEDE_POWER",
+    "name": "Stampede",
+    "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy."
+  },
+  "POWER.STAR_NEXT_TURN_POWER": {
+    "id": "POWER.STAR_NEXT_TURN_POWER",
+    "key": "STAR_NEXT_TURN_POWER",
+    "name": "Star Next Turn",
+    "description": "Gain 1 {singleStarIcon} next turn."
+  },
+  "POWER.STEAM_ERUPTION_POWER": {
+    "id": "POWER.STEAM_ERUPTION_POWER",
+    "key": "STEAM_ERUPTION_POWER",
+    "name": "Steam Eruption",
+    "description": "When killed, deals damage at the end of your next turn."
+  },
+  "POWER.STOCK_POWER": {
+    "id": "POWER.STOCK_POWER",
+    "key": "STOCK_POWER",
+    "name": "Stock",
+    "description": "When killed, a new Axebot is summoned in its place."
+  },
+  "POWER.STORM_POWER": {
+    "id": "POWER.STORM_POWER",
+    "key": "STORM_POWER",
+    "name": "Storm",
+    "description": "Whenever you play a Power, Channel 1 Lightning."
+  },
+  "POWER.STRANGLE_POWER": {
+    "id": "POWER.STRANGLE_POWER",
+    "key": "STRANGLE_POWER",
+    "name": "Strangle",
+    "description": "Whenever you play a card this turn, this enemy loses 2 HP."
+  },
+  "POWER.STRATAGEM_POWER": {
+    "id": "POWER.STRATAGEM_POWER",
+    "key": "STRATAGEM_POWER",
+    "name": "Stratagem",
+    "description": "Whenever you shuffle your Draw Pile, choose 1 card from it to put into your Hand."
+  },
+  "POWER.STRENGTH_POWER": {
+    "id": "POWER.STRENGTH_POWER",
+    "key": "STRENGTH_POWER",
+    "name": "Strength",
+    "description": "Strength adds additional damage to Attacks."
+  },
+  "POWER.SUBROUTINE_POWER": {
+    "id": "POWER.SUBROUTINE_POWER",
+    "key": "SUBROUTINE_POWER",
+    "name": "Subroutine",
+    "description": "Whenever you play a Power, gain 1 1 ."
+  },
+  "POWER.SUCK_POWER": {
+    "id": "POWER.SUCK_POWER",
+    "key": "SUCK_POWER",
+    "name": "Suck",
+    "description": "Whenever this creature deals unblocked attack damage, it gains 1 Strength."
+  },
+  "POWER.SUMMON_NEXT_TURN_POWER": {
+    "id": "POWER.SUMMON_NEXT_TURN_POWER",
+    "key": "SUMMON_NEXT_TURN_POWER",
+    "name": "Summon Next Turn",
+    "description": "At the start of your next turn, Summon 2."
+  },
+  "POWER.SURPRISE_POWER": {
+    "id": "POWER.SURPRISE_POWER",
+    "key": "SURPRISE_POWER",
+    "name": "Surprise",
+    "description": "Something is off about this creature..."
+  },
+  "POWER.SURROUNDED_POWER": {
+    "id": "POWER.SURROUNDED_POWER",
+    "key": "SURROUNDED_POWER",
+    "name": "Surrounded",
+    "description": "Receive 50% more damage if attacked from behind. Use targeting cards or potions to change your orientation."
+  },
+  "POWER.SWIPE_POWER": {
+    "id": "POWER.SWIPE_POWER",
+    "key": "SWIPE_POWER",
+    "name": "Swipe",
+    "description": "Upon killing this enemy, the stolen card is returned."
+  },
+  "POWER.SWORD_SAGE_POWER": {
+    "id": "POWER.SWORD_SAGE_POWER",
+    "key": "SWORD_SAGE_POWER",
+    "name": "Sword Sage",
+    "description": "Sovereign Blade gains Replay 1."
+  },
+  "POWER.TAG_TEAM_POWER": {
+    "id": "POWER.TAG_TEAM_POWER",
+    "key": "TAG_TEAM_POWER",
+    "name": "Tag Team",
+    "description": "The next Attack another player plays on the enemy is played {Amount} { extra times}."
+  },
+  "POWER.TAINTED_POWER": {
+    "id": "POWER.TAINTED_POWER",
+    "key": "TAINTED_POWER",
+    "name": "Tainted",
+    "description": "Take additional damage from Attacks this turn."
+  },
+  "POWER.TANGLED_POWER": {
+    "id": "POWER.TANGLED_POWER",
+    "key": "TANGLED_POWER",
+    "name": "Tangled",
+    "description": "Attacks cost 1 additional Energy this turn."
+  },
+  "POWER.TANK_POWER": {
+    "id": "POWER.TANK_POWER",
+    "key": "TANK_POWER",
+    "name": "Tank",
+    "description": "Take double damage from enemies. Allies take half damage from enemies."
+  },
+  "POWER.TAUNT_POWER": {
+    "id": "POWER.TAUNT_POWER",
+    "key": "TAUNT_POWER",
+    "name": "Taunt",
+    "description": "When an enemy attacks you, apply 1 Vulnerable to it."
+  },
+  "POWER.TEMPORARY_DEXTERITY_DOWN": {
+    "id": "POWER.TEMPORARY_DEXTERITY_DOWN",
+    "key": "TEMPORARY_DEXTERITY_DOWN",
+    "name": "",
+    "description": "Lose Dexterity until the end of this turn."
+  },
+  "POWER.TEMPORARY_DEXTERITY_POWER": {
+    "id": "POWER.TEMPORARY_DEXTERITY_POWER",
+    "key": "TEMPORARY_DEXTERITY_POWER",
+    "name": "",
+    "description": "Gain Dexterity until the end of this turn."
+  },
+  "POWER.TEMPORARY_FOCUS_DOWN": {
+    "id": "POWER.TEMPORARY_FOCUS_DOWN",
+    "key": "TEMPORARY_FOCUS_DOWN",
+    "name": "",
+    "description": "Lose Focus until the end of this turn."
+  },
+  "POWER.TEMPORARY_FOCUS_POWER": {
+    "id": "POWER.TEMPORARY_FOCUS_POWER",
+    "key": "TEMPORARY_FOCUS_POWER",
+    "name": "",
+    "description": "Gain Focus until the end of this turn."
+  },
+  "POWER.TEMPORARY_STRENGTH_DOWN": {
+    "id": "POWER.TEMPORARY_STRENGTH_DOWN",
+    "key": "TEMPORARY_STRENGTH_DOWN",
+    "name": "",
+    "description": "Lose Strength until the end of this turn."
+  },
+  "POWER.TEMPORARY_STRENGTH_POWER": {
+    "id": "POWER.TEMPORARY_STRENGTH_POWER",
+    "key": "TEMPORARY_STRENGTH_POWER",
+    "name": "",
+    "description": "Gain Strength until the end of this turn."
+  },
+  "POWER.TENDER_POWER": {
+    "id": "POWER.TENDER_POWER",
+    "key": "TENDER_POWER",
+    "name": "Tender",
+    "description": "Whenever you play a card, lose 1 Strength and 1 Dexterity this turn."
+  },
+  "POWER.TERRITORIAL_POWER": {
+    "id": "POWER.TERRITORIAL_POWER",
+    "key": "TERRITORIAL_POWER",
+    "name": "Territorial",
+    "description": "At the end of this creature's turn, it gains 1 Strength."
+  },
+  "POWER.TEZCATARAS_BLIGHT": {
+    "id": "POWER.TEZCATARAS_BLIGHT",
+    "key": "TEZCATARAS_BLIGHT",
+    "name": "Tezcataras Blight",
+    "description": "At the end of this turn, lose 1 Strength."
+  },
+  "POWER.THE_BOMB_POWER": {
+    "id": "POWER.THE_BOMB_POWER",
+    "key": "THE_BOMB_POWER",
+    "name": "The Bomb",
+    "description": "At the end of 3 turns, deal 40 damage to ALL enemies."
+  },
+  "POWER.THE_GAMBIT_POWER": {
+    "id": "POWER.THE_GAMBIT_POWER",
+    "key": "THE_GAMBIT_POWER",
+    "name": "The Gambit",
+    "description": "If you take unblocked attack damage this combat, die."
+  },
+  "POWER.THE_HUNT_POWER": {
+    "id": "POWER.THE_HUNT_POWER",
+    "key": "THE_HUNT_POWER",
+    "name": "The Hunt",
+    "description": "Gain 1 additional card reward at the end of combat."
+  },
+  "POWER.THE_SEALED_THRONE_POWER": {
+    "id": "POWER.THE_SEALED_THRONE_POWER",
+    "key": "THE_SEALED_THRONE_POWER",
+    "name": "The Sealed Throne",
+    "description": "Whenever you play a card, gain {singleStarIcon}."
+  },
+  "POWER.THIEVERY_POWER": {
+    "id": "POWER.THIEVERY_POWER",
+    "key": "THIEVERY_POWER",
+    "name": "Thievery",
+    "description": "Steals Gold when Attacking."
+  },
+  "POWER.THORNS_POWER": {
+    "id": "POWER.THORNS_POWER",
+    "key": "THORNS_POWER",
+    "name": "Thorns",
+    "description": "When hit by an attack, deal damage back."
+  },
+  "POWER.THUNDER_POWER": {
+    "id": "POWER.THUNDER_POWER",
+    "key": "THUNDER_POWER",
+    "name": "Thunder",
+    "description": "Whenever you Evoke Lightning, deal 8 damage to each enemy hit."
+  },
+  "POWER.TOOLS_OF_THE_TRADE_POWER": {
+    "id": "POWER.TOOLS_OF_THE_TRADE_POWER",
+    "key": "TOOLS_OF_THE_TRADE_POWER",
+    "name": "Tools of the Trade",
+    "description": "At the start of your turn, draw 1 card and discard 1 card."
+  },
+  "POWER.TORIC_TOUGHNESS_POWER": {
+    "id": "POWER.TORIC_TOUGHNESS_POWER",
+    "key": "TORIC_TOUGHNESS_POWER",
+    "name": "Toric Toughness",
+    "description": "Gain 5 Block at the start of the next 2 turns."
+  },
+  "POWER.TORN": {
+    "id": "POWER.TORN",
+    "key": "TORN",
+    "name": "Torn",
+    "description": "Draw 1 fewer card every turn."
+  },
+  "POWER.TRACKING_POWER": {
+    "id": "POWER.TRACKING_POWER",
+    "key": "TRACKING_POWER",
+    "name": "Tracking",
+    "description": "Weak enemies take 2 times more damage from Attacks."
+  },
+  "POWER.TRASH_TO_TREASURE_POWER": {
+    "id": "POWER.TRASH_TO_TREASURE_POWER",
+    "key": "TRASH_TO_TREASURE_POWER",
+    "name": "Trash to Treasure",
+    "description": "Whenever you create a Status, Channel 1 random Orb."
+  },
+  "POWER.TYRANNY_POWER": {
+    "id": "POWER.TYRANNY_POWER",
+    "key": "TYRANNY_POWER",
+    "name": "Tyranny",
+    "description": "At the start of your turn, draw a card and Exhaust a card from your Hand."
+  },
+  "POWER.UNMOVABLE_POWER": {
+    "id": "POWER.UNMOVABLE_POWER",
+    "key": "UNMOVABLE_POWER",
+    "name": "Unmovable",
+    "description": "The first time you gain Block from a card each turn, double the amount gained."
+  },
+  "POWER.UNSTABLE": {
+    "id": "POWER.UNSTABLE",
+    "key": "UNSTABLE",
+    "name": "Unstable",
+    "description": "Whenever you play an Attack, this enemy loses 5 HP."
+  },
+  "POWER.UNSTEADY": {
+    "id": "POWER.UNSTEADY",
+    "key": "UNSTEADY",
+    "name": "Unsteady",
+    "description": "When Flail Knight falls below 50% HP, becomes Stunned."
+  },
+  "POWER.VEILPIERCER_POWER": {
+    "id": "POWER.VEILPIERCER_POWER",
+    "key": "VEILPIERCER_POWER",
+    "name": "Veilpiercer",
+    "description": "The next Ethereal card you play costs 0."
+  },
+  "POWER.VICIOUS_POWER": {
+    "id": "POWER.VICIOUS_POWER",
+    "key": "VICIOUS_POWER",
+    "name": "Vicious",
+    "description": "Whenever you apply Vulnerable, draw 1 card."
+  },
+  "POWER.VIGOR_POWER": {
+    "id": "POWER.VIGOR_POWER",
+    "key": "VIGOR_POWER",
+    "name": "Vigor",
+    "description": "Your next Attack deals additional damage."
+  },
+  "POWER.VISUAL_ONLY": {
+    "id": "POWER.VISUAL_ONLY",
+    "key": "VISUAL_ONLY",
+    "name": "Visual Only",
+    "description": "Visual Only"
+  },
+  "POWER.VITAL_SPARK_POWER": {
+    "id": "POWER.VITAL_SPARK_POWER",
+    "key": "VITAL_SPARK_POWER",
+    "name": "Vital Spark",
+    "description": "ALL Skills are Tainted 2."
+  },
+  "POWER.VOID_FORM_POWER": {
+    "id": "POWER.VOID_FORM_POWER",
+    "key": "VOID_FORM_POWER",
+    "name": "Void Form",
+    "description": "The first 2 cards you play each turn are free to play."
+  },
+  "POWER.VULNERABLE_POWER": {
+    "id": "POWER.VULNERABLE_POWER",
+    "key": "VULNERABLE_POWER",
+    "name": "Vulnerable",
+    "description": "Vulnerable creatures take 50% more damage from Attacks."
+  },
+  "POWER.WASTE_AWAY_POWER": {
+    "id": "POWER.WASTE_AWAY_POWER",
+    "key": "WASTE_AWAY_POWER",
+    "name": "Waste Away",
+    "description": "Gain 1 less Energy per turn."
+  },
+  "POWER.WEAK_POWER": {
+    "id": "POWER.WEAK_POWER",
+    "key": "WEAK_POWER",
+    "name": "Weak",
+    "description": "Weakened creatures deal 25% less damage with Attacks."
+  },
+  "POWER.WELL_LAID_PLANS_POWER": {
+    "id": "POWER.WELL_LAID_PLANS_POWER",
+    "key": "WELL_LAID_PLANS_POWER",
+    "name": "Well-Laid Plans",
+    "description": "At the end of your turn, Retain up to 1 card."
+  },
+  "POWER.WINGED_JUMP_POWER": {
+    "id": "POWER.WINGED_JUMP_POWER",
+    "key": "WINGED_JUMP_POWER",
+    "name": "Winged Jump",
+    "description": "At the start of your turn, apply 1 Vulnerable to ALL enemies."
+  },
+  "POWER.WITHERING_PRESENCE_POWER": {
+    "id": "POWER.WITHERING_PRESENCE_POWER",
+    "key": "WITHERING_PRESENCE_POWER",
+    "name": "Withering Presence",
+    "description": "Every 6 cards you play, add a Wither to your Hand."
+  },
+  "POWER.WRAITH_FORM_POWER": {
+    "id": "POWER.WRAITH_FORM_POWER",
+    "key": "WRAITH_FORM_POWER",
+    "name": "Wraith Form",
+    "description": "At the start of your turn, lose 1 Dexterity."
+  }
+}
