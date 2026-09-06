@@ -45,7 +45,7 @@ def _resolve_case_insensitive(base: str, parts: List[str]) -> List[str]:
 
 
 def _get_linux_steam_libraries() -> List[str]:
-    """Finds all Steam library directories on Linux/SteamOS."""
+    """Finds Steam library directories on Linux/SteamOS without slow recursive disk crawling."""
     home = os.path.expanduser("~")
     vdf_candidates = [
         os.path.join(home, ".local/share/Steam/steamapps/libraryfolders.vdf"),
@@ -56,9 +56,9 @@ def _get_linux_steam_libraries() -> List[str]:
     libraries = [
         os.path.join(home, ".local/share/Steam"),
         os.path.join(home, ".steam/steam"),
-        os.path.join(home, ".var/app/com.valvesoftware.Steam/.local/share/Steam"),
     ]
 
+    # Fast VDF parser
     for vdf in vdf_candidates:
         if os.path.exists(vdf):
             try:
@@ -66,16 +66,23 @@ def _get_linux_steam_libraries() -> List[str]:
                     content = f.read()
                 matches = re.findall(r'"path"\s+"([^"]+)"', content)
                 for m in matches:
-                    if m not in libraries:
+                    if m not in libraries and os.path.isdir(m):
                         libraries.append(m)
             except Exception:
                 pass
 
-    # Check SD card mounts on Steam Deck
-    for sd in glob.glob("/run/media/**/steamapps", recursive=True):
-        p = os.path.dirname(sd)
-        if p not in libraries:
-            libraries.append(p)
+    # Fast check of standard Steam Deck SD card mount points
+    if os.path.exists("/run/media"):
+        for sub in ["/run/media", "/run/media/deck"]:
+            if os.path.exists(sub):
+                try:
+                    for d in os.listdir(sub):
+                        full = os.path.join(sub, d)
+                        if os.path.isdir(full) and os.path.exists(os.path.join(full, "steamapps")):
+                            if full not in libraries:
+                                libraries.append(full)
+                except Exception:
+                    pass
 
     return libraries
 
@@ -116,54 +123,34 @@ def get_default_save_dir() -> Optional[str]:
     if "STS2_SAVE_DIR" in os.environ and os.path.exists(os.environ["STS2_SAVE_DIR"]):
         return os.environ["STS2_SAVE_DIR"]
 
-    existing_candidates: List[str] = []
-
     if sys.platform == "win32":
         appdata = os.environ.get("APPDATA", "")
         if appdata:
             base = os.path.join(appdata, "SlayTheSpire2", "steam")
             matches = glob.glob(os.path.join(base, "*", "profile1", "saves"))
-            existing_candidates.extend(matches)
+            if matches:
+                return matches[0]
+            return os.path.join(base, "profile1", "saves")
     else:
-        # Linux / Steam Deck Proton prefix
-        # Check standard Proton prefix for AppID 2868840
+        # Linux / Steam Deck Proton prefix for 2868840
         for lib in _get_linux_steam_libraries():
-            compat_dir = os.path.join(lib, "steamapps/compatdata")
-            if not os.path.exists(compat_dir):
-                continue
-
-            # Check 2868840 specifically first
-            sts2_compat = os.path.join(compat_dir, STS2_STEAM_APPID)
+            sts2_compat = os.path.join(lib, f"steamapps/compatdata/{STS2_STEAM_APPID}/pfx/drive_c")
             if os.path.exists(sts2_compat):
-                drive_c = os.path.join(sts2_compat, "pfx/drive_c")
-                resolved = _resolve_case_insensitive(drive_c, ["users", "*", "appdata", "roaming", "slaythespire2", "steam", "*", "profile1", "saves"])
-                existing_candidates.extend(resolved)
-
-            # Also check any other folder in compatdata that might be STS2 (e.g. non-steam or custom)
-            for sub in os.listdir(compat_dir):
-                if sub == STS2_STEAM_APPID:
-                    continue
-                pfx_c = os.path.join(compat_dir, sub, "pfx/drive_c")
-                if os.path.exists(pfx_c):
-                    resolved = _resolve_case_insensitive(pfx_c, ["users", "*", "appdata", "roaming", "slaythespire2", "steam", "*", "profile1", "saves"])
-                    existing_candidates.extend(resolved)
+                resolved = _resolve_case_insensitive(
+                    sts2_compat,
+                    ["users", "*", "appdata", "roaming", "slaythespire2", "steam", "*", "profile1", "saves"]
+                )
+                for r in resolved:
+                    if os.path.exists(r):
+                        return r
 
         # Check native Linux directory as fallback
         home = os.path.expanduser("~")
         native_dir = os.path.join(home, ".config/SlayTheSpire2/profile1/saves")
         if os.path.exists(native_dir):
-            existing_candidates.append(native_dir)
+            return native_dir
 
-    # Prioritize directories that actually have save files in them
-    for path in existing_candidates:
-        if os.path.exists(path):
-            if os.path.exists(os.path.join(path, "current_run.save")) or os.path.exists(os.path.join(path, "progress.save")):
-                return path
-
-    if existing_candidates:
-        return existing_candidates[0]
-
-    # Fallback to standard Steam Deck Proton path if none exist yet
+    # Fallback default
     home = os.path.expanduser("~")
     return os.path.join(
         home,
