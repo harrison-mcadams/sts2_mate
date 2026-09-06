@@ -35,6 +35,7 @@ except ImportError:
 logger = logging.getLogger("sts2_companion.screen_reader")
 
 CARDS_DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "sts2_cards.json")
+RELICS_DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "sts2_relics.json")
 
 COMMON_STOPWORDS = {
     "form", "strike", "blade", "slash", "wall", "wave", "soul", "shot",
@@ -47,13 +48,30 @@ COMMON_STOPWORDS = {
 
 
 class ScreenReader:
-    def __init__(self, cards_path: Optional[str] = None):
+    def __init__(self, cards_path: Optional[str] = None, relics_path: Optional[str] = None):
         self.cards_path = cards_path or CARDS_DATA_PATH
+        self.relics_path = relics_path or RELICS_DATA_PATH
         self.cards: Dict[str, Dict[str, Any]] = {}
         self.normalized_cards: Dict[str, Dict[str, Any]] = {}
         self.character_cards: Dict[str, List[Dict[str, Any]]] = {}
         self.distinctive_words: Dict[str, List[Dict[str, Any]]] = {}
+        self.normalized_relics: Dict[str, Dict[str, Any]] = {}
         self._load_cards()
+        self._load_relics()
+
+    def _load_relics(self):
+        if not os.path.exists(self.relics_path):
+            return
+        try:
+            with open(self.relics_path, "r", encoding="utf-8") as f:
+                relics = json.load(f)
+            for rid, rinfo in relics.items():
+                name = rinfo.get("name", "").strip()
+                if name:
+                    self.normalized_relics[self._normalize(name)] = rinfo
+            logger.info(f"Loaded {len(self.normalized_relics)} relics for OCR recognition.")
+        except Exception as e:
+            logger.error(f"Error loading relics for ScreenReader: {e}")
 
     def _load_cards(self):
         if not os.path.exists(self.cards_path):
@@ -394,6 +412,98 @@ class ScreenReader:
                 "error": str(e),
                 "cards": []
             }
+
+    async def detect_shop(self, img: Image.Image, character_hint: Optional[str] = None) -> Dict[str, Any]:
+        """Runs OCR on shop screen and matches cards and relics."""
+        if not HAS_WINOCR:
+            return {"cards": [], "relics": []}
+
+        w, h = img.size
+        try:
+            ocr_result = await winocr.recognize_pil(img, "en")
+        except Exception as e:
+            logger.error(f"Shop OCR error: {e}")
+            return {"cards": [], "relics": []}
+
+        recognized_cards = []
+        recognized_relics = []
+        seen_cards = set()
+        seen_relics = set()
+
+        for line in ocr_result.lines:
+            text = line.text.strip()
+            norm = self._normalize(text)
+            if len(norm) < 3:
+                continue
+
+            # Check cards
+            if norm in self.normalized_cards:
+                c = self.normalized_cards[norm]
+                cname = c.get("name", "")
+                if cname not in seen_cards:
+                    recognized_cards.append({
+                        "name": cname,
+                        "price": 65,  # default estimated price
+                    })
+                    seen_cards.add(cname)
+                    continue
+
+            # Check relics
+            if norm in self.normalized_relics:
+                r = self.normalized_relics[norm]
+                rname = r.get("name", "")
+                if rname not in seen_relics:
+                    recognized_relics.append({
+                        "name": rname,
+                        "price": 160,  # default estimated price
+                    })
+                    seen_relics.add(rname)
+                    continue
+
+            # Fuzzy match cards
+            for c_norm, c_info in self.normalized_cards.items():
+                if abs(len(c_norm) - len(norm)) <= 3:
+                    ratio = difflib.SequenceMatcher(None, norm, c_norm).ratio()
+                    if ratio >= 0.85:
+                        cname = c_info.get("name", "")
+                        if cname not in seen_cards:
+                            recognized_cards.append({"name": cname, "price": 65})
+                            seen_cards.add(cname)
+                            break
+
+            # Fuzzy match relics
+            for r_norm, r_info in self.normalized_relics.items():
+                if abs(len(r_norm) - len(norm)) <= 3:
+                    ratio = difflib.SequenceMatcher(None, norm, r_norm).ratio()
+                    if ratio >= 0.85:
+                        rname = r_info.get("name", "")
+                        if rname not in seen_relics:
+                            recognized_relics.append({"name": rname, "price": 160})
+                            seen_relics.add(rname)
+                            break
+
+        return {
+            "cards": recognized_cards[:7],
+            "relics": recognized_relics[:3],
+        }
+
+    def grab_and_detect_shop(self, character_hint: Optional[str] = None) -> Dict[str, Any]:
+        """Captures screen and recognizes shop items."""
+        img, source = self.capture()
+        if img is None:
+            return {"success": False, "error": source, "cards": [], "relics": []}
+
+        try:
+            detected = asyncio.run(self.detect_shop(img, character_hint=character_hint))
+            return {
+                "success": True,
+                "source": source,
+                "cards": detected.get("cards", []),
+                "relics": detected.get("relics", []),
+            }
+        except Exception as e:
+            logger.error(f"Error in grab_and_detect_shop: {e}")
+            return {"success": False, "error": str(e), "cards": [], "relics": []}
 
 
 _screen_reader_instance: Optional[ScreenReader] = None

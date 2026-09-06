@@ -16,6 +16,7 @@ from ..core.watcher import STS2LiveWatcher
 from ..advisor.evaluator import STS2CardRewardAdvisor
 from ..advisor.ai_advisor import GeminiSTS2Advisor
 from ..advisor.deck_engine import GeminiDeckEngine
+from ..advisor.shop_advisor import STS2ShopAdvisor
 from ..core.paths import get_default_save_dir
 from ..core.config import get_gemini_api_key, get_gemini_model, load_config, save_config
 
@@ -33,6 +34,7 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
     advisor = STS2CardRewardAdvisor(parser.cards_db, mined_stats)
     ai_advisor = GeminiSTS2Advisor(parser.cards_db, parser.relics_db, mined_stats)
     deck_engine = GeminiDeckEngine(parser.cards_db, parser.relics_db, mined_stats)
+    shop_advisor = STS2ShopAdvisor(parser.cards_db, parser.relics_db, parser.potions_db, mined_stats)
 
     # Event queue for SSE updates
     event_queues: List[queue.Queue] = []
@@ -99,11 +101,23 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         results.sort(key=lambda x: x.get("name", ""))
         return jsonify(results)
 
+    @app.route("/api/potions")
+    def get_potions():
+        query = request.args.get("q", "").lower()
+        results = []
+        for pid, p in parser.potions_db.items():
+            if query and query not in p.get("name", "").lower() and query not in pid.lower():
+                continue
+            results.append(p)
+        results.sort(key=lambda x: x.get("name", ""))
+        return jsonify(results)
+
     @app.route("/api/stats")
     def get_stats():
         force = request.args.get("refresh", "false").lower() == "true"
         stats = miner.mine_all(force_refresh=force)
         advisor.update_player_stats(stats)
+        shop_advisor.update_player_stats(stats)
         return jsonify(stats)
 
     @app.route("/api/advise", methods=["POST"])
@@ -302,6 +316,43 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         result = deck_engine.chat_about_deck(user_msg, current_run, conversation_history=history)
         return jsonify(result)
 
+    @app.route("/api/shop_advise", methods=["POST"])
+    def advise_shop():
+        data = request.get_json() or {}
+        current_run = watcher.get_state() or {}
+        result = shop_advisor.evaluate_shop(data, current_run)
+        return jsonify(result)
+
+    @app.route("/api/shop_screen_grab", methods=["POST"])
+    def screen_grab_shop():
+        try:
+            from sts2_companion.core.screen_reader import get_screen_reader
+            sr = get_screen_reader()
+            current_run = watcher.get_state() or {}
+            char_hint = current_run.get("character")
+            result = sr.grab_and_detect_shop(character_hint=char_hint)
+            if not result.get("success"):
+                return jsonify(result), 400
+
+            shop_data = {
+                "gold": current_run.get("gold", 0),
+                "removal_cost": 75,
+                "removal_available": True,
+                "cards": result.get("cards", []),
+                "relics": result.get("relics", []),
+                "potions": []
+            }
+            evaluation = shop_advisor.evaluate_shop(shop_data, current_run)
+            return jsonify({
+                "success": True,
+                "source": result.get("source"),
+                "cards": result.get("cards", []),
+                "relics": result.get("relics", []),
+                "evaluation": evaluation
+            })
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
     @app.route("/api/sync", methods=["POST"])
     def resync_database():
         try:
@@ -313,6 +364,9 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
             ai_advisor.relics_db = parser.relics_db
             deck_engine.cards_db = parser.cards_db
             deck_engine.relics_db = parser.relics_db
+            shop_advisor.cards_db = parser.cards_db
+            shop_advisor.relics_db = parser.relics_db
+            shop_advisor.potions_db = parser.potions_db
             return jsonify({"success": True, "extracted": res})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500

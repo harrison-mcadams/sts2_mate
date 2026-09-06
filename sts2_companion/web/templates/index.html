@@ -70,6 +70,9 @@
     <button class="nav-tab active" data-tab="tabAdvisor">
       <span class="tab-icon">⚖️</span> Card Reward Advisor
     </button>
+    <button class="nav-tab" data-tab="tabShop">
+      <span class="tab-icon">🏪</span> Shop Helper
+    </button>
     <button class="nav-tab" data-tab="tabDeck">
       <span class="tab-icon">🃏</span> Deck & Relics (<span id="deckTabCount">0</span>)
     </button>
@@ -240,6 +243,277 @@
         <!-- Ranked Cards Breakdown Grid -->
         <div class="ranked-cards-grid" id="rankedCardsGrid">
           <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: SHOP HELPER -->
+    <section id="tabShop" class="tab-pane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Merchant & Shop Spending Helper</h2>
+          <p class="pane-subtitle">Budget optimization: evaluates card purge value vs. buying relics, gap-filler cards, and potions within your exact gold budget.</p>
+        </div>
+        <div class="shop-header-actions">
+          <button id="btnShopScreenGrab" class="btn-secondary btn-cam" title="Grab Shop from STS2 Screen (PC)">
+            <span class="cam-icon">📸</span> Grab Shop from Screen (PC)
+          </button>
+          <button id="btnEvaluateShop" class="btn-primary" title="Calculate optimal purchase combinations">
+            <span>✨</span> Optimize Purchases
+          </button>
+        </div>
+      </div>
+
+      <!-- Shop Controls & Budget Bar -->
+      <div class="shop-budget-bar">
+        <div class="budget-stat-item">
+          <label for="shopGoldInput">Available Gold:</label>
+          <div class="budget-input-wrapper">
+            <input type="number" id="shopGoldInput" min="0" value="99" class="budget-number-input">
+            <span class="budget-icon">🪙</span>
+          </div>
+        </div>
+        <div class="budget-stat-item">
+          <label for="shopRemovalCost">Card Purge Cost:</label>
+          <div class="budget-input-wrapper">
+            <input type="number" id="shopRemovalCost" min="0" value="75" class="budget-number-input">
+            <span class="budget-icon">🪙</span>
+          </div>
+        </div>
+        <div class="budget-checkbox-item">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="shopRemovalAvailable" checked>
+            <span>Purge Service Available</span>
+          </label>
+        </div>
+        <div class="budget-actions-right">
+          <button id="btnClearShop" class="btn-sm btn-outline">Clear Offerings</button>
+        </div>
+      </div>
+
+      <!-- Shop Offerings 3-Column Input Grid -->
+      <div class="shop-offerings-grid">
+        <!-- Column 1: Cards -->
+        <div class="shop-offering-column">
+          <div class="column-header">
+            <span class="column-icon">🃏</span>
+            <h3>Offered Cards</h3>
+            <span class="column-badge">5 Class + 2 Colorless</span>
+          </div>
+
+          <div class="shop-slots-list">
+            <div class="shop-sub-header">Class Cards (Est. 65-150g)</div>
+            <div class="shop-item-row" data-type="card" data-idx="1">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard1" class="shop-autocomplete-input" placeholder="Class Card 1..." autocomplete="off">
+                <div id="shopCardDropdown1" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice1" class="shop-price-input" value="65" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="card" data-idx="2">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard2" class="shop-autocomplete-input" placeholder="Class Card 2..." autocomplete="off">
+                <div id="shopCardDropdown2" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice2" class="shop-price-input" value="65" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="card" data-idx="3">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard3" class="shop-autocomplete-input" placeholder="Class Card 3..." autocomplete="off">
+                <div id="shopCardDropdown3" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice3" class="shop-price-input" value="65" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="card" data-idx="4">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard4" class="shop-autocomplete-input" placeholder="Class Card 4..." autocomplete="off">
+                <div id="shopCardDropdown4" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice4" class="shop-price-input" value="65" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="card" data-idx="5">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard5" class="shop-autocomplete-input" placeholder="Class Card 5..." autocomplete="off">
+                <div id="shopCardDropdown5" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice5" class="shop-price-input" value="65" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+
+            <div class="shop-sub-header">Colorless Cards (Est. 100-250g)</div>
+            <div class="shop-item-row" data-type="card" data-idx="6">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard6" class="shop-autocomplete-input" placeholder="Colorless Card 1..." autocomplete="off">
+                <div id="shopCardDropdown6" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice6" class="shop-price-input" value="120" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="card" data-idx="7">
+              <div class="shop-input-group">
+                <input type="text" id="shopCard7" class="shop-autocomplete-input" placeholder="Colorless Card 2..." autocomplete="off">
+                <div id="shopCardDropdown7" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopCardPrice7" class="shop-price-input" value="120" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Relics -->
+        <div class="shop-offering-column">
+          <div class="column-header">
+            <span class="column-icon">💍</span>
+            <h3>Offered Relics</h3>
+            <span class="column-badge">3 Relics</span>
+          </div>
+
+          <div class="shop-slots-list">
+            <div class="shop-sub-header">Relic Inventory (Est. 150-300g)</div>
+            <div class="shop-item-row" data-type="relic" data-idx="1">
+              <div class="shop-input-group">
+                <input type="text" id="shopRelic1" class="shop-autocomplete-input" placeholder="Relic 1..." autocomplete="off">
+                <div id="shopRelicDropdown1" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopRelicPrice1" class="shop-price-input" value="160" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="relic" data-idx="2">
+              <div class="shop-input-group">
+                <input type="text" id="shopRelic2" class="shop-autocomplete-input" placeholder="Relic 2..." autocomplete="off">
+                <div id="shopRelicDropdown2" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopRelicPrice2" class="shop-price-input" value="160" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="relic" data-idx="3">
+              <div class="shop-input-group">
+                <input type="text" id="shopRelic3" class="shop-autocomplete-input" placeholder="Relic 3..." autocomplete="off">
+                <div id="shopRelicDropdown3" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopRelicPrice3" class="shop-price-input" value="160" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Potions -->
+        <div class="shop-offering-column">
+          <div class="column-header">
+            <span class="column-icon">🧪</span>
+            <h3>Offered Potions</h3>
+            <span class="column-badge">3 Potions</span>
+          </div>
+
+          <div class="shop-slots-list">
+            <div class="shop-sub-header">Potion Stock (Est. 50-100g)</div>
+            <div class="shop-item-row" data-type="potion" data-idx="1">
+              <div class="shop-input-group">
+                <input type="text" id="shopPotion1" class="shop-autocomplete-input" placeholder="Potion 1..." autocomplete="off">
+                <div id="shopPotionDropdown1" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopPotionPrice1" class="shop-price-input" value="50" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="potion" data-idx="2">
+              <div class="shop-input-group">
+                <input type="text" id="shopPotion2" class="shop-autocomplete-input" placeholder="Potion 2..." autocomplete="off">
+                <div id="shopPotionDropdown2" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopPotionPrice2" class="shop-price-input" value="50" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+            <div class="shop-item-row" data-type="potion" data-idx="3">
+              <div class="shop-input-group">
+                <input type="text" id="shopPotion3" class="shop-autocomplete-input" placeholder="Potion 3..." autocomplete="off">
+                <div id="shopPotionDropdown3" class="autocomplete-dropdown"></div>
+              </div>
+              <div class="shop-price-group">
+                <input type="number" id="shopPotionPrice3" class="shop-price-input" value="50" min="0" placeholder="Price">
+                <span class="price-suffix">🪙</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State Indicator -->
+      <div id="shopLoadingIndicator" class="shop-loading hidden">
+        <div class="spinner"></div>
+        <p>Calculating optimal shop purchase baskets & deck synergies...</p>
+      </div>
+
+      <!-- Shop Results Section -->
+      <div id="shopResultsContainer" class="shop-results hidden">
+        <!-- Strategic Shopping Verdict Banner -->
+        <div id="shopVerdictBanner" class="shop-verdict-banner">
+          <div class="verdict-icon">🏪</div>
+          <div class="verdict-content">
+            <h3 id="shopVerdictTitle">OPTIMAL SHOPPING PLAN</h3>
+            <p id="shopVerdictText">Fill in offerings above and click Optimize Purchases or Screen Grab.</p>
+          </div>
+        </div>
+
+        <!-- Purchase Baskets Comparison -->
+        <div class="shop-section-heading">
+          <h3>🧺 Optimal Purchase Baskets (Fitting Your Gold Budget)</h3>
+        </div>
+        <div id="shopBasketsRow" class="shop-baskets-row">
+          <!-- Dynamically populated Basket 1 & Basket 2 cards -->
+        </div>
+
+        <!-- Purge Deep Dive Card -->
+        <div id="shopPurgeCard" class="shop-purge-card">
+          <!-- Dynamically populated Purge vs Buy card -->
+        </div>
+
+        <!-- Ranked Inventory Breakdown Table -->
+        <div class="shop-section-heading">
+          <h3>📊 All Offered Items Value Breakdown</h3>
+        </div>
+        <div class="shop-ranked-table-wrapper">
+          <table class="shop-table" id="shopRankedTable">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Priority</th>
+                <th>Strategic Analysis & Synergy Context</th>
+              </tr>
+            </thead>
+            <tbody id="shopRankedTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
         </div>
       </div>
     </section>

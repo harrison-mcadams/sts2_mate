@@ -4,6 +4,7 @@
 
 let allCards = [];
 let allRelics = [];
+let allPotions = [];
 let currentState = null;
 let currentChatHistory = [];
 let lastEvaluatedCards = [];
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAdvisorActions();
   setupAIChat();
   setupDeckCoachActions();
+  setupShopHelper();
   setupSettingsModal();
   setupSyncButton();
   loadInitialData();
@@ -44,6 +46,8 @@ function setupTabs() {
         renderCompendium();
       } else if (targetPaneId === "tabDeck") {
         loadDeckAnalysis();
+      } else if (targetPaneId === "tabShop") {
+        syncShopGoldFromState();
       }
     });
   });
@@ -57,8 +61,11 @@ async function loadInitialData() {
 
     const relicRes = await fetch("/api/relics");
     allRelics = await relicRes.json();
+
+    const potionRes = await fetch("/api/potions");
+    allPotions = await potionRes.json();
   } catch (err) {
-    console.error("Failed loading card database:", err);
+    console.error("Failed loading databases:", err);
   }
 }
 
@@ -1449,4 +1456,499 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// ==========================================================================
+// SHOP HELPER CONTROLLER
+// ==========================================================================
+
+function syncShopGoldFromState() {
+  if (currentState && currentState.gold !== undefined) {
+    const goldInput = document.getElementById("shopGoldInput");
+    if (goldInput && (!goldInput.value || goldInput.value === "99")) {
+      goldInput.value = currentState.gold;
+    }
+  }
+}
+
+function setupShopHelper() {
+  setupShopAutocompletes();
+
+  const btnEvaluate = document.getElementById("btnEvaluateShop");
+  if (btnEvaluate) {
+    btnEvaluate.addEventListener("click", () => {
+      runShopEvaluation();
+    });
+  }
+
+  const btnScreenGrab = document.getElementById("btnShopScreenGrab");
+  if (btnScreenGrab) {
+    btnScreenGrab.addEventListener("click", () => {
+      runShopScreenGrab();
+    });
+  }
+
+  const btnClear = document.getElementById("btnClearShop");
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      clearShopOfferings();
+    });
+  }
+}
+
+function setupShopAutocompletes() {
+  // 1. Cards (slots 1..7)
+  for (let i = 1; i <= 7; i++) {
+    const input = document.getElementById(`shopCard${i}`);
+    const dropdown = document.getElementById(`shopCardDropdown${i}`);
+    if (!input || !dropdown) continue;
+
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (!val) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      const currentChar = currentState && currentState.character ? currentState.character.toLowerCase() : "";
+      const isColorlessSlot = i >= 6;
+
+      const matches = allCards.filter(c =>
+        c.name.toLowerCase().includes(val) || (c.key && c.key.toLowerCase().includes(val))
+      ).sort((a, b) => {
+        if (isColorlessSlot) {
+          const aColorless = (a.character || "").toLowerCase() === "colorless" ? 0 : 1;
+          const bColorless = (b.character || "").toLowerCase() === "colorless" ? 0 : 1;
+          if (aColorless !== bColorless) return aColorless - bColorless;
+        } else {
+          const aChar = (a.character || "").toLowerCase() === currentChar ? 0 : 1;
+          const bChar = (b.character || "").toLowerCase() === currentChar ? 0 : 1;
+          if (aChar !== bChar) return aChar - bChar;
+        }
+        const aStarts = a.name.toLowerCase().startsWith(val) ? 0 : 1;
+        const bStarts = b.name.toLowerCase().startsWith(val) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return a.name.localeCompare(b.name);
+      }).slice(0, 10);
+
+      dropdown.innerHTML = "";
+      if (matches.length === 0) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      matches.forEach(c => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `
+          <span>${escapeHtml(c.name)}</span>
+          <span class="card-char">${escapeHtml(c.character || "Card")}</span>
+        `;
+        item.addEventListener("click", () => {
+          input.value = c.name;
+          dropdown.style.display = "none";
+          // Auto-advance to next empty card slot
+          if (i < 7) {
+            const nextInput = document.getElementById(`shopCard${i + 1}`);
+            if (nextInput && !nextInput.value) {
+              nextInput.focus();
+            }
+          }
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  }
+
+  // 2. Relics (slots 1..3)
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`shopRelic${i}`);
+    const dropdown = document.getElementById(`shopRelicDropdown${i}`);
+    if (!input || !dropdown) continue;
+
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (!val) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      const matches = allRelics.filter(r =>
+        (r.name && r.name.toLowerCase().includes(val)) ||
+        (r.key && r.key.toLowerCase().includes(val))
+      ).slice(0, 10);
+
+      dropdown.innerHTML = "";
+      if (matches.length === 0) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      matches.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `
+          <span>${escapeHtml(r.name)}</span>
+          <span class="card-char">${escapeHtml(r.tier || "Relic")}</span>
+        `;
+        item.addEventListener("click", () => {
+          input.value = r.name;
+          dropdown.style.display = "none";
+          if (i < 3) {
+            const nextInput = document.getElementById(`shopRelic${i + 1}`);
+            if (nextInput && !nextInput.value) {
+              nextInput.focus();
+            }
+          }
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  }
+
+  // 3. Potions (slots 1..3)
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`shopPotion${i}`);
+    const dropdown = document.getElementById(`shopPotionDropdown${i}`);
+    if (!input || !dropdown) continue;
+
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (!val) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      const matches = allPotions.filter(p =>
+        (p.name && p.name.toLowerCase().includes(val)) ||
+        (p.key && p.key.toLowerCase().includes(val))
+      ).slice(0, 10);
+
+      dropdown.innerHTML = "";
+      if (matches.length === 0) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      matches.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `
+          <span>${escapeHtml(p.name)}</span>
+          <span class="card-char">Potion</span>
+        `;
+        item.addEventListener("click", () => {
+          input.value = p.name;
+          dropdown.style.display = "none";
+          if (i < 3) {
+            const nextInput = document.getElementById(`shopPotion${i + 1}`);
+            if (nextInput && !nextInput.value) {
+              nextInput.focus();
+            }
+          }
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  }
+}
+
+function clearShopOfferings() {
+  for (let i = 1; i <= 7; i++) {
+    const input = document.getElementById(`shopCard${i}`);
+    if (input) input.value = "";
+  }
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`shopRelic${i}`);
+    if (input) input.value = "";
+    const pInput = document.getElementById(`shopPotion${i}`);
+    if (pInput) pInput.value = "";
+  }
+  const resultsContainer = document.getElementById("shopResultsContainer");
+  if (resultsContainer) resultsContainer.classList.add("hidden");
+}
+
+async function runShopEvaluation() {
+  const loading = document.getElementById("shopLoadingIndicator");
+  const resultsContainer = document.getElementById("shopResultsContainer");
+
+  const gold = parseInt(document.getElementById("shopGoldInput")?.value) || 0;
+  const removalCost = parseInt(document.getElementById("shopRemovalCost")?.value) || 75;
+  const removalAvailable = document.getElementById("shopRemovalAvailable")?.checked ?? true;
+
+  const cards = [];
+  for (let i = 1; i <= 7; i++) {
+    const name = document.getElementById(`shopCard${i}`)?.value.trim();
+    const price = parseInt(document.getElementById(`shopCardPrice${i}`)?.value) || (i >= 6 ? 120 : 65);
+    if (name) {
+      cards.push({ name, price });
+    }
+  }
+
+  const relics = [];
+  for (let i = 1; i <= 3; i++) {
+    const name = document.getElementById(`shopRelic${i}`)?.value.trim();
+    const price = parseInt(document.getElementById(`shopRelicPrice${i}`)?.value) || 160;
+    if (name) {
+      relics.push({ name, price });
+    }
+  }
+
+  const potions = [];
+  for (let i = 1; i <= 3; i++) {
+    const name = document.getElementById(`shopPotion${i}`)?.value.trim();
+    const price = parseInt(document.getElementById(`shopPotionPrice${i}`)?.value) || 50;
+    if (name) {
+      potions.push({ name, price });
+    }
+  }
+
+  if (cards.length === 0 && relics.length === 0 && potions.length === 0 && !removalAvailable) {
+    alert("Please enter at least one card, relic, potion, or enable card removal to optimize.");
+    return;
+  }
+
+  if (loading) loading.classList.remove("hidden");
+  if (resultsContainer) resultsContainer.classList.add("hidden");
+
+  try {
+    const res = await fetch("/api/shop_advise", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        gold: gold,
+        removal_cost: removalCost,
+        removal_available: removalAvailable,
+        cards: cards,
+        relics: relics,
+        potions: potions,
+      }),
+    });
+
+    const data = await res.json();
+    renderShopResults(data);
+  } catch (err) {
+    console.error("Shop evaluation error:", err);
+    alert("Failed to evaluate shop: " + err);
+  } finally {
+    if (loading) loading.classList.add("hidden");
+  }
+}
+
+async function runShopScreenGrab() {
+  const btn = document.getElementById("btnShopScreenGrab");
+  const loading = document.getElementById("shopLoadingIndicator");
+  const origHtml = btn ? btn.innerHTML : "";
+
+  if (btn) {
+    btn.innerHTML = `<span class="cam-icon">📷</span> Grabbing Screen...`;
+    btn.disabled = true;
+  }
+  if (loading) loading.classList.remove("hidden");
+
+  try {
+    const res = await fetch("/api/shop_screen_grab", { method: "POST" });
+    const data = await res.json();
+
+    if (!data.success) {
+      alert("Screen grab failed: " + (data.error || "Could not detect shop window."));
+      return;
+    }
+
+    const cards = data.cards || [];
+    const relics = data.relics || [];
+
+    // Populate cards
+    cards.forEach((c, idx) => {
+      if (idx < 7) {
+        const input = document.getElementById(`shopCard${idx + 1}`);
+        if (input) input.value = c.name || "";
+        if (c.price) {
+          const priceInput = document.getElementById(`shopCardPrice${idx + 1}`);
+          if (priceInput) priceInput.value = c.price;
+        }
+      }
+    });
+
+    // Populate relics
+    relics.forEach((r, idx) => {
+      if (idx < 3) {
+        const input = document.getElementById(`shopRelic${idx + 1}`);
+        if (input) input.value = r.name || "";
+        if (r.price) {
+          const priceInput = document.getElementById(`shopRelicPrice${idx + 1}`);
+          if (priceInput) priceInput.value = r.price;
+        }
+      }
+    });
+
+    // If evaluation returned, display it
+    if (data.evaluation) {
+      renderShopResults(data.evaluation);
+    } else {
+      runShopEvaluation();
+    }
+  } catch (err) {
+    console.error("Screen grab error:", err);
+    alert("Shop screen grab error: " + err);
+  } finally {
+    if (btn) {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+    }
+    if (loading) loading.classList.add("hidden");
+  }
+}
+
+function renderShopResults(evalData) {
+  const resultsContainer = document.getElementById("shopResultsContainer");
+  if (!resultsContainer || !evalData) return;
+
+  resultsContainer.classList.remove("hidden");
+
+  // 1. Verdict Banner
+  const verdictText = document.getElementById("shopVerdictText");
+  const verdictTitle = document.getElementById("shopVerdictTitle");
+  if (verdictText && evalData.gemini_advice) {
+    verdictText.textContent = evalData.gemini_advice;
+    if (verdictTitle) verdictTitle.textContent = "MERCHANT STRATEGY & SPENDING VERDICT";
+  }
+
+  // 2. Purchase Baskets
+  const basketsRow = document.getElementById("shopBasketsRow");
+  if (basketsRow) {
+    basketsRow.innerHTML = "";
+    const baskets = evalData.baskets || [];
+
+    if (baskets.length === 0) {
+      basketsRow.innerHTML = `
+        <div class="shop-basket-card">
+          <div class="basket-card-title">Save Gold</div>
+          <p class="basket-rationale">Your available gold (${evalData.gold || 0} 🪙) is insufficient for high-value items or offered options don't justify breaking your reserve. Save your gold for future shops or events.</p>
+        </div>
+      `;
+    } else {
+      baskets.forEach(basket => {
+        const isPrimary = basket.basket_id === 1;
+        const card = document.createElement("div");
+        card.className = `shop-basket-card ${isPrimary ? "primary" : "secondary"}`;
+
+        let itemsHtml = "";
+        (basket.items || []).forEach(item => {
+          let icon = "🃏";
+          if (item.item_type === "relic") icon = "💍";
+          else if (item.item_type === "potion") icon = "🧪";
+          else if (item.item_type === "removal") icon = "🗑️";
+
+          itemsHtml += `
+            <div class="basket-item-row">
+              <div class="basket-item-left">
+                <span class="basket-item-type-icon">${icon}</span>
+                <div class="basket-item-info">
+                  <span class="basket-item-name">${escapeHtml(item.name)}</span>
+                  <span class="basket-item-reason">${escapeHtml(item.reasoning || "")}</span>
+                </div>
+              </div>
+              <span class="basket-item-price">${item.price} 🪙</span>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="basket-card-header ${isPrimary ? "primary" : "secondary"}">
+            <div>
+              <div class="basket-tag">${isPrimary ? "🌟 Recommended (Best Value)" : "⚡ Alternative Strategy"}</div>
+              <div class="basket-card-title">${escapeHtml(basket.title || `Basket ${basket.basket_id}`)}</div>
+            </div>
+            <div class="basket-cost-box">
+              <div class="basket-total-cost">${basket.total_spent} 🪙</div>
+              <div class="basket-gold-left">${basket.gold_remaining} 🪙 left</div>
+            </div>
+          </div>
+          <div class="basket-items-list">
+            ${itemsHtml}
+          </div>
+          <div class="basket-rationale">
+            <strong>Strategy:</strong> ${escapeHtml(basket.rationale || "")}
+          </div>
+        `;
+        basketsRow.appendChild(card);
+      });
+    }
+  }
+
+  // 3. Purge Deep Dive Card
+  const purgeCard = document.getElementById("shopPurgeCard");
+  if (purgeCard) {
+    const pEval = evalData.purge_evaluation;
+    if (pEval) {
+      const pClass = getPriorityClass(pEval.priority);
+      purgeCard.innerHTML = `
+        <div class="purge-icon">🗑️</div>
+        <div class="purge-content">
+          <div class="purge-header-line">
+            <span class="purge-title">Card Removal Service (${pEval.cost} 🪙)</span>
+            <span class="priority-tag ${pClass}">${escapeHtml(pEval.priority)}</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Target: <strong>${escapeHtml(pEval.target)}</strong></span>
+          </div>
+          <div class="purge-explanation">${escapeHtml(pEval.reasoning)}</div>
+        </div>
+      `;
+    }
+  }
+
+  // 4. Ranked Table
+  const tableBody = document.getElementById("shopRankedTableBody");
+  if (tableBody) {
+    tableBody.innerHTML = "";
+    const items = evalData.ranked_items || [];
+
+    items.forEach(item => {
+      const tr = document.createElement("tr");
+      const pClass = getPriorityClass(item.priority);
+      let icon = "🃏";
+      let typeLabel = "Card";
+      if (item.item_type === "relic") { icon = "💍"; typeLabel = "Relic"; }
+      else if (item.item_type === "potion") { icon = "🧪"; typeLabel = "Potion"; }
+      else if (item.item_type === "removal") { icon = "🗑️"; typeLabel = "Purge"; }
+
+      tr.innerHTML = `
+        <td class="col-type"><span style="margin-right:4px;">${icon}</span> ${typeLabel}</td>
+        <td class="col-name">${escapeHtml(item.name)}</td>
+        <td class="col-price">${item.price} 🪙</td>
+        <td class="col-priority"><span class="priority-tag ${pClass}">${escapeHtml(item.priority)}</span></td>
+        <td class="col-reasoning">${escapeHtml(item.reasoning || "")}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+}
+
+function getPriorityClass(priority) {
+  const p = (priority || "").toUpperCase();
+  if (p.includes("MUST")) return "priority-must-buy";
+  if (p.includes("STRONG")) return "priority-strong-value";
+  if (p.includes("CONSIDER")) return "priority-consider";
+  return "priority-skip";
 }
