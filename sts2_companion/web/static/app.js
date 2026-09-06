@@ -5,6 +5,7 @@
 let allCards = [];
 let allRelics = [];
 let allPotions = [];
+let allEvents = [];
 let currentState = null;
 let currentChatHistory = [];
 let lastEvaluatedCards = [];
@@ -12,11 +13,14 @@ let lastAIRec = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
+  setupEncounterModeSwitcher();
   setupAutocomplete();
   setupAdvisorActions();
   setupAIChat();
   setupDeckCoachActions();
   setupShopHelper();
+  setupBossAdvisor();
+  setupEventAdvisor();
   setupSettingsModal();
   setupSyncButton();
   loadInitialData();
@@ -46,7 +50,7 @@ function setupTabs() {
         renderCompendium();
       } else if (targetPaneId === "tabDeck") {
         loadDeckAnalysis();
-      } else if (targetPaneId === "tabShop") {
+      } else if (targetPaneId === "tabEncounter") {
         syncShopGoldFromState();
       }
     });
@@ -64,6 +68,9 @@ async function loadInitialData() {
 
     const potionRes = await fetch("/api/potions");
     allPotions = await potionRes.json();
+
+    const eventRes = await fetch("/api/events_catalog");
+    allEvents = await eventRes.json();
   } catch (err) {
     console.error("Failed loading databases:", err);
   }
@@ -193,10 +200,14 @@ function handleAutoRewardEvaluation(state) {
       }
     });
 
-    // Auto-switch to Advisor tab so the player sees it immediately
-    const advisorTab = document.querySelector('.nav-tab[data-tab="tabAdvisor"]');
-    if (advisorTab && !advisorTab.classList.contains("active")) {
-      advisorTab.click();
+    // Auto-switch to Encounter tab and Card Reward mode so the player sees it immediately
+    const encounterTab = document.querySelector('.nav-tab[data-tab="tabEncounter"]');
+    if (encounterTab && !encounterTab.classList.contains("active")) {
+      encounterTab.click();
+    }
+    const cardRewardModeBtn = document.querySelector('.encounter-mode-btn[data-mode="subCardReward"]');
+    if (cardRewardModeBtn && !cardRewardModeBtn.classList.contains("active")) {
+      cardRewardModeBtn.click();
     }
 
     // Automatically trigger evaluation
@@ -1947,8 +1958,401 @@ function renderShopResults(evalData) {
 
 function getPriorityClass(priority) {
   const p = (priority || "").toUpperCase();
-  if (p.includes("MUST")) return "priority-must-buy";
-  if (p.includes("STRONG")) return "priority-strong-value";
-  if (p.includes("CONSIDER")) return "priority-consider";
+  if (p.includes("MUST") || p.includes("RECOMMENDED")) return "priority-must-buy";
+  if (p.includes("STRONG") || p.includes("EXCELLENT")) return "priority-strong-value";
+  if (p.includes("CONSIDER") || p.includes("VIABLE")) return "priority-consider";
   return "priority-skip";
+}
+
+// ==========================================================================
+// ENCOUNTER MODE SWITCHER
+// ==========================================================================
+function setupEncounterModeSwitcher() {
+  const modeBtns = document.querySelectorAll(".encounter-mode-btn");
+  modeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modeBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const targetSubpaneId = btn.dataset.mode;
+      document.querySelectorAll(".encounter-subpane").forEach(pane => {
+        pane.classList.remove("active");
+      });
+      const targetPane = document.getElementById(targetSubpaneId);
+      if (targetPane) {
+        targetPane.classList.add("active");
+      }
+
+      if (targetSubpaneId === "subShop") {
+        syncShopGoldFromState();
+      }
+    });
+  });
+}
+
+// ==========================================================================
+// BOSS REWARD ADVISOR CONTROLLER
+// ==========================================================================
+function setupBossAdvisor() {
+  // Autocompletes for 3 boss relics
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`bossRelic${i}`);
+    const dropdown = document.getElementById(`bossRelicDropdown${i}`);
+    if (!input || !dropdown) continue;
+
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (!val) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      const matches = allRelics.filter(r =>
+        (r.name && r.name.toLowerCase().includes(val)) ||
+        (r.key && r.key.toLowerCase().includes(val))
+      ).slice(0, 10);
+
+      dropdown.innerHTML = "";
+      if (matches.length === 0) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      matches.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `
+          <span>${escapeHtml(r.name)}</span>
+          <span class="card-char">Boss Relic</span>
+        `;
+        item.addEventListener("click", () => {
+          input.value = r.name;
+          dropdown.style.display = "none";
+          if (i < 3) {
+            const next = document.getElementById(`bossRelic${i + 1}`);
+            if (next && !next.value) next.focus();
+          }
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  }
+
+  const btnEvaluate = document.getElementById("btnEvaluateBoss");
+  if (btnEvaluate) {
+    btnEvaluate.addEventListener("click", () => {
+      runBossEvaluation();
+    });
+  }
+
+  const btnScreenGrab = document.getElementById("btnBossScreenGrab");
+  if (btnScreenGrab) {
+    btnScreenGrab.addEventListener("click", () => {
+      runBossScreenGrab();
+    });
+  }
+}
+
+async function runBossEvaluation() {
+  const relics = [];
+  for (let i = 1; i <= 3; i++) {
+    const val = document.getElementById(`bossRelic${i}`)?.value.trim();
+    if (val) relics.push(val);
+  }
+
+  if (relics.length === 0) {
+    alert("Please enter at least one offered Boss Relic.");
+    return;
+  }
+
+  const loading = document.getElementById("bossLoadingIndicator");
+  const results = document.getElementById("bossResultsContainer");
+  if (loading) loading.classList.remove("hidden");
+  if (results) results.classList.add("hidden");
+
+  try {
+    const res = await fetch("/api/boss_advise", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ relics }),
+    });
+    const data = await res.json();
+    renderBossResults(data);
+  } catch (err) {
+    console.error("Boss evaluate error:", err);
+    alert("Failed to evaluate boss relics: " + err);
+  } finally {
+    if (loading) loading.classList.add("hidden");
+  }
+}
+
+async function runBossScreenGrab() {
+  const btn = document.getElementById("btnBossScreenGrab");
+  const loading = document.getElementById("bossLoadingIndicator");
+  const origHtml = btn ? btn.innerHTML : "";
+
+  if (btn) {
+    btn.innerHTML = `<span class="cam-icon">📷</span> Grabbing Screen...`;
+    btn.disabled = true;
+  }
+  if (loading) loading.classList.remove("hidden");
+
+  try {
+    const res = await fetch("/api/boss_screen_grab", { method: "POST" });
+    const data = await res.json();
+
+    if (!data.success) {
+      alert("Screen grab failed: " + (data.error || "Could not detect boss relics."));
+      return;
+    }
+
+    const detected = data.relics || [];
+    detected.forEach((r, idx) => {
+      if (idx < 3) {
+        const input = document.getElementById(`bossRelic${idx + 1}`);
+        if (input) input.value = r.name || "";
+      }
+    });
+
+    if (data.evaluation) {
+      renderBossResults(data.evaluation);
+    } else {
+      runBossEvaluation();
+    }
+  } catch (err) {
+    console.error("Screen grab error:", err);
+    alert("Boss relic screen grab error: " + err);
+  } finally {
+    if (btn) {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+    }
+    if (loading) loading.classList.add("hidden");
+  }
+}
+
+function renderBossResults(data) {
+  const results = document.getElementById("bossResultsContainer");
+  if (!results || !data) return;
+
+  results.classList.remove("hidden");
+
+  // Energy Profile
+  const eProfile = data.energy_profile;
+  const summaryEl = document.getElementById("bossEnergySummaryText");
+  if (summaryEl && eProfile) {
+    summaryEl.textContent = `Deck Energy Profile: Avg Cost ${eProfile.avg_cost} • 2+ Cost Cards: ${eProfile.high_cost_count} • 0-Cost Cards: ${eProfile.zero_cost_count} • Energy Demand: ${eProfile.energy_hungry ? "High (Energy Starved)" : "Moderate/Balanced"}`;
+  }
+
+  // Recommended Hero Banner
+  const rec = data.recommended;
+  const recBadge = document.getElementById("bossRecommendedBadge");
+  const verdictTitle = document.getElementById("bossVerdictTitle");
+  const verdictText = document.getElementById("bossVerdictText");
+
+  if (rec) {
+    if (recBadge) recBadge.textContent = `RECOMMENDED PICK: ${rec.name.toUpperCase()}`;
+    if (verdictTitle) verdictTitle.textContent = rec.synergy_reason;
+    if (verdictText) verdictText.textContent = data.verdict || data.gemini_advice || "";
+  }
+
+  // Ranked Grid
+  const grid = document.getElementById("bossRankedGrid");
+  if (grid) {
+    grid.innerHTML = "";
+    const choices = data.ranked_choices || [];
+    choices.forEach(c => {
+      const isTop = c.rank === 1;
+      const card = document.createElement("div");
+      card.className = `boss-choice-card ${isTop ? "rank-1" : ""}`;
+
+      const riskClass = `drawback-risk-${(c.drawback_risk || "low").toLowerCase()}`;
+      const pClass = getPriorityClass(c.priority);
+
+      card.innerHTML = `
+        <div class="boss-card-top">
+          <div>
+            <div class="boss-card-rank-badge">RANK #${c.rank} • ${isTop ? "⭐ BEST PICK" : "ALTERNATIVE"}</div>
+            <h4 class="boss-card-title">${escapeHtml(c.name)}</h4>
+          </div>
+          <span class="priority-tag ${pClass}">${escapeHtml(c.priority)}</span>
+        </div>
+        <div class="boss-card-desc">${escapeHtml(c.description || "")}</div>
+        ${c.drawback_warning ? `
+          <div class="boss-drawback-box ${riskClass}">
+            <strong>Drawback (${c.drawback_risk} RISK):</strong> ${escapeHtml(c.drawback_warning)}
+          </div>
+        ` : ""}
+        <div class="boss-mitigation-guide">
+          <strong>Playbook:</strong> ${escapeHtml(c.mitigation_guide || "")}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+}
+
+// ==========================================================================
+// ? EVENT ADVISOR CONTROLLER
+// ==========================================================================
+function setupEventAdvisor() {
+  const input = document.getElementById("eventSearchInput");
+  const dropdown = document.getElementById("eventSearchDropdown");
+
+  if (input && dropdown) {
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (!val) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      const matches = allEvents.filter(e =>
+        e.title.toLowerCase().includes(val) || e.id.toLowerCase().includes(val)
+      ).slice(0, 10);
+
+      dropdown.innerHTML = "";
+      if (matches.length === 0) {
+        dropdown.style.display = "none";
+        return;
+      }
+
+      matches.forEach(e => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `
+          <span>${escapeHtml(e.title)}</span>
+          <span class="card-char">${e.options_count} Choices</span>
+        `;
+        item.addEventListener("click", () => {
+          input.value = e.title;
+          dropdown.style.display = "none";
+          evaluateEvent(e.id);
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  }
+
+  // Quick event buttons
+  const quickChips = document.querySelectorAll(".event-chip");
+  quickChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      const eventId = chip.dataset.event;
+      if (input) input.value = chip.textContent.trim();
+      evaluateEvent(eventId);
+    });
+  });
+
+  const btnEvaluate = document.getElementById("btnEvaluateEvent");
+  if (btnEvaluate) {
+    btnEvaluate.addEventListener("click", () => {
+      const val = input ? input.value.trim() : "";
+      if (!val) {
+        alert("Please select or type an event name.");
+        return;
+      }
+      evaluateEvent(val);
+    });
+  }
+}
+
+async function evaluateEvent(eventIdentifier) {
+  const loading = document.getElementById("eventLoadingIndicator");
+  const results = document.getElementById("eventResultsContainer");
+
+  if (loading) loading.classList.remove("hidden");
+  if (results) results.classList.add("hidden");
+
+  try {
+    const res = await fetch("/api/event_advise", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: eventIdentifier }),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert("Event evaluation failed: " + (data.error || "Event not found."));
+      return;
+    }
+    renderEventResults(data);
+  } catch (err) {
+    console.error("Event evaluate error:", err);
+    alert("Failed to evaluate event: " + err);
+  } finally {
+    if (loading) loading.classList.add("hidden");
+  }
+}
+
+function renderEventResults(data) {
+  const results = document.getElementById("eventResultsContainer");
+  if (!results || !data) return;
+
+  results.classList.remove("hidden");
+
+  // Event Narrative
+  const ev = data.event;
+  const nTitle = document.getElementById("eventNarrativeTitle");
+  const nDesc = document.getElementById("eventNarrativeDesc");
+  if (ev) {
+    if (nTitle) nTitle.textContent = ev.title || "Event";
+    if (nDesc) nDesc.textContent = ev.description || "";
+  }
+
+  // Recommended Choice Banner
+  const rec = data.recommended;
+  const recBadge = document.getElementById("eventRecommendedBadge");
+  const verdictTitle = document.getElementById("eventVerdictTitle");
+  const verdictText = document.getElementById("eventVerdictText");
+
+  if (rec) {
+    if (recBadge) recBadge.textContent = `RECOMMENDED: ${rec.title.toUpperCase()}`;
+    if (verdictTitle) verdictTitle.textContent = rec.reasoning;
+    if (verdictText) verdictText.textContent = data.verdict || data.gemini_advice || "";
+  }
+
+  // Options Grid
+  const grid = document.getElementById("eventOptionsGrid");
+  if (grid) {
+    grid.innerHTML = "";
+    const options = data.options || [];
+
+    options.forEach(opt => {
+      const isRec = rec && rec.key === opt.key;
+      const card = document.createElement("div");
+      card.className = `event-option-card ${isRec ? "recommended" : ""}`;
+
+      const pClass = getPriorityClass(opt.priority);
+      const riskClass = `drawback-risk-${(opt.risk_level || "safe").toLowerCase().replace(" ", "-")}`;
+
+      card.innerHTML = `
+        <div class="event-opt-header">
+          <span class="event-opt-title">${escapeHtml(opt.title)}</span>
+          <span class="priority-tag ${pClass}">${escapeHtml(opt.priority)}</span>
+        </div>
+        <div class="event-opt-desc">${escapeHtml(opt.description || "")}</div>
+        <div class="boss-drawback-box ${riskClass}" style="margin-top:4px;">
+          <strong>Risk Level:</strong> ${escapeHtml(opt.risk_level)}
+        </div>
+        <div class="event-opt-reasoning">
+          <strong>Strategic Analysis:</strong> ${escapeHtml(opt.reasoning || "")}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
 }

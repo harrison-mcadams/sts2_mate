@@ -67,14 +67,11 @@
 
   <!-- Navigation Tabs -->
   <nav class="nav-tabs">
-    <button class="nav-tab active" data-tab="tabAdvisor">
-      <span class="tab-icon">⚖️</span> Card Reward Advisor
-    </button>
-    <button class="nav-tab" data-tab="tabShop">
-      <span class="tab-icon">🏪</span> Shop Helper
+    <button class="nav-tab active" data-tab="tabEncounter">
+      <span class="tab-icon">⚔️</span> Encounter Helper
     </button>
     <button class="nav-tab" data-tab="tabDeck">
-      <span class="tab-icon">🃏</span> Deck & Relics (<span id="deckTabCount">0</span>)
+      <span class="tab-icon">🃏</span> Deck Engine & Relics (<span id="deckTabCount">0</span>)
     </button>
     <button class="nav-tab" data-tab="tabHistory">
       <span class="tab-icon">📜</span> Player History & Stats
@@ -86,9 +83,27 @@
 
   <!-- Main Container -->
   <main class="main-container">
-    <!-- TAB 1: CARD REWARD ADVISOR -->
-    <section id="tabAdvisor" class="tab-pane active">
-      <div class="pane-header">
+    <!-- UNIFIED TAB: ENCOUNTER HELPER -->
+    <section id="tabEncounter" class="tab-pane active">
+      <!-- Encounter Mode Switcher Bar -->
+      <div class="encounter-mode-bar">
+        <button class="encounter-mode-btn active" data-mode="subCardReward">
+          <span class="mode-icon">🃏</span> Card Rewards
+        </button>
+        <button class="encounter-mode-btn" data-mode="subShop">
+          <span class="mode-icon">🏪</span> Merchant Shop
+        </button>
+        <button class="encounter-mode-btn" data-mode="subBoss">
+          <span class="mode-icon">👑</span> Boss Rewards
+        </button>
+        <button class="encounter-mode-btn" data-mode="subEvent">
+          <span class="mode-icon">❓</span> ? Event Rooms
+        </button>
+      </div>
+
+      <!-- SUB-PANE 1: CARD REWARD ADVISOR -->
+      <div id="subCardReward" class="encounter-subpane active">
+        <div class="pane-header">
         <div class="pane-title-group">
           <h2>Card Reward Decision Assistant</h2>
           <p class="pane-subtitle">Contextual analysis for Slay the Spire 2: compares offered cards against your current deck synergy, relic scaling, floor threats, and personal win rates.</p>
@@ -243,13 +258,10 @@
         <!-- Ranked Cards Breakdown Grid -->
         <div class="ranked-cards-grid" id="rankedCardsGrid">
           <!-- Populated by JavaScript -->
-        </div>
       </div>
-    </section>
-
-    <!-- TAB: SHOP HELPER -->
-    <section id="tabShop" class="tab-pane">
-      <div class="pane-header">
+      <!-- SUB-PANE 2: SHOP HELPER -->
+      <div id="subShop" class="encounter-subpane">
+        <div class="pane-header">
         <div class="pane-title-group">
           <h2>Merchant & Shop Spending Helper</h2>
           <p class="pane-subtitle">Budget optimization: evaluates card purge value vs. buying relics, gap-filler cards, and potions within your exact gold budget.</p>
@@ -516,10 +528,157 @@
           </table>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- TAB 2: DECK & RELICS -->
-    <section id="tabDeck" class="tab-pane">
+    <!-- SUB-PANE 3: BOSS REWARDS -->
+    <div id="subBoss" class="encounter-subpane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Boss Relic Decision Assistant</h2>
+          <p class="pane-subtitle">Act clear evaluation: balances energy requirements, card cost curves, and deck velocity against severe relic drawbacks.</p>
+        </div>
+        <div class="boss-header-actions">
+          <button id="btnBossScreenGrab" class="btn-secondary btn-cam" title="Grab Boss Relics from STS2 Screen (PC)">
+            <span class="cam-icon">📸</span> Grab Boss Rewards from Screen (PC)
+          </button>
+          <button id="btnEvaluateBoss" class="btn-primary" title="Analyze offered Boss Relics">
+            <span>✨</span> Evaluate Boss Relics
+          </button>
+        </div>
+      </div>
+
+      <!-- Energy Profile & 3 Relic Inputs -->
+      <div class="boss-input-card">
+        <div class="slots-header">
+          <h3>Select 3 Offered Boss Relics</h3>
+          <span class="hint-text">Enter the 3 boss relics presented on the Act victory screen.</span>
+        </div>
+
+        <div class="boss-slots-grid">
+          <div class="boss-slot">
+            <label for="bossRelic1">Boss Relic 1</label>
+            <input type="text" id="bossRelic1" class="boss-autocomplete-input" placeholder="e.g. Cursed Key..." autocomplete="off">
+            <div id="bossRelicDropdown1" class="autocomplete-dropdown"></div>
+          </div>
+          <div class="boss-slot">
+            <label for="bossRelic2">Boss Relic 2</label>
+            <input type="text" id="bossRelic2" class="boss-autocomplete-input" placeholder="e.g. Velvet Choker..." autocomplete="off">
+            <div id="bossRelicDropdown2" class="autocomplete-dropdown"></div>
+          </div>
+          <div class="boss-slot">
+            <label for="bossRelic3">Boss Relic 3</label>
+            <input type="text" id="bossRelic3" class="boss-autocomplete-input" placeholder="e.g. Astrolabe..." autocomplete="off">
+            <div id="bossRelicDropdown3" class="autocomplete-dropdown"></div>
+          </div>
+        </div>
+
+        <!-- Deck Energy Context Tag -->
+        <div class="boss-energy-summary" id="bossEnergySummary">
+          <span class="energy-icon">⚡</span>
+          <span id="bossEnergySummaryText">Deck Energy Profile: Avg Cost 1.1 • 2+ Cost Cards: 2 • Energy Demand: Moderate</span>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="bossLoadingIndicator" class="shop-loading hidden">
+        <div class="spinner"></div>
+        <p>Analyzing energy curve, sustain, and relic drawback severity...</p>
+      </div>
+
+      <!-- Results Container -->
+      <div id="bossResultsContainer" class="boss-results hidden">
+        <!-- Recommended Pick Banner -->
+        <div id="bossVerdictBanner" class="boss-verdict-banner">
+          <div class="verdict-icon">👑</div>
+          <div class="verdict-content">
+            <div class="verdict-badge" id="bossRecommendedBadge">RECOMMENDED PICK: ASTROLABE</div>
+            <h3 id="bossVerdictTitle">Transforms 3 starter cards into immediate upgraded power</h3>
+            <p id="bossVerdictText">Your deck has 8 starter cards and low energy demand. Astrolabe removes dead weight while saving camp upgrades.</p>
+          </div>
+        </div>
+
+        <!-- 3 Ranked Choices Comparison Cards -->
+        <div class="boss-ranked-grid" id="bossRankedGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-PANE 4: ? EVENT ROOMS -->
+    <div id="subEvent" class="encounter-subpane">
+      <div class="pane-header">
+        <div class="pane-title-group">
+          <h2>Unknown Room (?) & Event Decision Helper</h2>
+          <p class="pane-subtitle">Risk/reward optimizer for 60+ STS2 events: evaluates HP sacrifice thresholds, curse tolerance, and transform gains.</p>
+        </div>
+        <div class="event-header-actions">
+          <button id="btnEvaluateEvent" class="btn-primary" title="Evaluate chosen event options">
+            <span>✨</span> Evaluate Event Choice
+          </button>
+        </div>
+      </div>
+
+      <!-- Event Selector Card -->
+      <div class="event-selector-card">
+        <div class="event-search-wrapper">
+          <label for="eventSearchInput">Search or Select Current Event:</label>
+          <div class="input-with-icon">
+            <input type="text" id="eventSearchInput" class="event-search-input" placeholder="Type event name (e.g. Abyssal Baths, Amalgamator, Aroma of Chaos)..." autocomplete="off">
+            <div id="eventSearchDropdown" class="autocomplete-dropdown"></div>
+          </div>
+        </div>
+
+        <!-- Quick Event Suggestions -->
+        <div class="event-quick-chips" id="eventQuickChips">
+          <span class="chips-label">Popular Events:</span>
+          <button class="event-chip" data-event="ABYSSAL_BATHS">Abyssal Baths</button>
+          <button class="event-chip" data-event="AMALGAMATOR">Amalgamator</button>
+          <button class="event-chip" data-event="AROMA_OF_CHAOS">Aroma of Chaos</button>
+          <button class="event-chip" data-event="BRAIN_LEECH">Brain Leech</button>
+          <button class="event-chip" data-event="BATTLEWORN_DUMMY">Battleworn Dummy</button>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="eventLoadingIndicator" class="shop-loading hidden">
+        <div class="spinner"></div>
+        <p>Calculating event risk/reward, HP thresholds, and deck impact...</p>
+      </div>
+
+      <!-- Event Results Container -->
+      <div id="eventResultsContainer" class="event-results hidden">
+        <!-- Event Narrative Box -->
+        <div class="event-narrative-card" id="eventNarrativeCard">
+          <div class="narrative-header">
+            <span class="narrative-icon">📜</span>
+            <h3 id="eventNarrativeTitle">Amalgamator</h3>
+          </div>
+          <p id="eventNarrativeDesc" class="narrative-text">A hulking six-armed figure toils away at a Bone Anvil...</p>
+        </div>
+
+        <!-- Recommended Choice Banner -->
+        <div id="eventVerdictBanner" class="event-verdict-banner">
+          <div class="verdict-icon">💡</div>
+          <div class="verdict-content">
+            <div class="verdict-badge" id="eventRecommendedBadge">RECOMMENDED: COMBINE STRIKES</div>
+            <h3 id="eventVerdictTitle">Remove 2 Strikes and gain a high-impact technique</h3>
+            <p id="eventVerdictText">With 5 starter strikes diluting your hand, cutting 2 immediately improves draw consistency.</p>
+          </div>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="event-options-heading">
+          <h3>Available Event Choices</h3>
+        </div>
+        <div class="event-options-grid" id="eventOptionsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: DECK & RELICS -->
+  <section id="tabDeck" class="tab-pane">
       <div class="pane-header">
         <div class="pane-title-group">
           <h2>Deck Engine & Pilot Coach</h2>

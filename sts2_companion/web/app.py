@@ -17,6 +17,8 @@ from ..advisor.evaluator import STS2CardRewardAdvisor
 from ..advisor.ai_advisor import GeminiSTS2Advisor
 from ..advisor.deck_engine import GeminiDeckEngine
 from ..advisor.shop_advisor import STS2ShopAdvisor
+from ..advisor.boss_advisor import STS2BossRewardAdvisor
+from ..advisor.event_advisor import STS2EventAdvisor
 from ..core.paths import get_default_save_dir
 from ..core.config import get_gemini_api_key, get_gemini_model, load_config, save_config
 
@@ -35,6 +37,8 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
     ai_advisor = GeminiSTS2Advisor(parser.cards_db, parser.relics_db, mined_stats)
     deck_engine = GeminiDeckEngine(parser.cards_db, parser.relics_db, mined_stats)
     shop_advisor = STS2ShopAdvisor(parser.cards_db, parser.relics_db, parser.potions_db, mined_stats)
+    boss_advisor = STS2BossRewardAdvisor(parser.cards_db, parser.relics_db, mined_stats)
+    event_advisor = STS2EventAdvisor(data_dir=data_dir)
 
     # Event queue for SSE updates
     event_queues: List[queue.Queue] = []
@@ -118,6 +122,7 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         stats = miner.mine_all(force_refresh=force)
         advisor.update_player_stats(stats)
         shop_advisor.update_player_stats(stats)
+        boss_advisor.update_player_stats(stats)
         return jsonify(stats)
 
     @app.route("/api/advise", methods=["POST"])
@@ -353,6 +358,51 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
 
+    @app.route("/api/boss_advise", methods=["POST"])
+    def advise_boss_reward():
+        data = request.get_json() or {}
+        relics = data.get("relics", [])
+        current_run = watcher.get_state() or {}
+        result = boss_advisor.evaluate_boss_rewards(relics, current_run)
+        return jsonify(result)
+
+    @app.route("/api/boss_screen_grab", methods=["POST"])
+    def screen_grab_boss_relics():
+        try:
+            from sts2_companion.core.screen_reader import get_screen_reader
+            sr = get_screen_reader()
+            result = sr.grab_and_detect_boss_relics()
+            if not result.get("success"):
+                return jsonify(result), 400
+
+            relic_names = [r["name"] for r in result.get("relics", [])]
+            current_run = watcher.get_state() or {}
+            evaluation = None
+            if relic_names:
+                evaluation = boss_advisor.evaluate_boss_rewards(relic_names, current_run)
+
+            return jsonify({
+                "success": True,
+                "source": result.get("source"),
+                "relics": result.get("relics", []),
+                "evaluation": evaluation
+            })
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    @app.route("/api/events_catalog")
+    def get_events_catalog():
+        q = request.args.get("q", "")
+        return jsonify(event_advisor.get_event_catalog(query=q))
+
+    @app.route("/api/event_advise", methods=["POST"])
+    def advise_event():
+        data = request.get_json() or {}
+        event_id_or_title = data.get("event") or data.get("event_id") or ""
+        current_run = watcher.get_state() or {}
+        result = event_advisor.evaluate_event(event_id_or_title, current_run)
+        return jsonify(result)
+
     @app.route("/api/sync", methods=["POST"])
     def resync_database():
         try:
@@ -367,6 +417,9 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
             shop_advisor.cards_db = parser.cards_db
             shop_advisor.relics_db = parser.relics_db
             shop_advisor.potions_db = parser.potions_db
+            boss_advisor.cards_db = parser.cards_db
+            boss_advisor.relics_db = parser.relics_db
+            event_advisor._load_events()
             return jsonify({"success": True, "extracted": res})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500

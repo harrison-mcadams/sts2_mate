@@ -2421,4 +2421,468 @@ body {
   line-height: 1.4;
 }
 
+/* ==========================================================================
+   UNIFIED ENCOUNTER HELPER & SUBPANES
+   ========================================================================== */
+.encounter-mode-bar {
+  display: flex;
+  background: var(--bg-slot);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 6px;
+  gap: 8px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.encounter-mode-btn {
+  flex: 1;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+}
+
+.encounter-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.encounter-mode-btn.active {
+  background: var(--char-accent);
+  color: #fff;
+  box-shadow: 0 0 16px var(--char-accent-glow);
+}
+
+.encounter-subpane {
+  display: none;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.encounter-subpane.active {
+  display: block;
+}
+
+/* ==========================================================================
+   BOSS RELIC ADVISOR STYLES
+   ========================================================================== */
+.boss-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.boss-input-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.boss-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.boss-slot {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.boss-slot label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.boss-autocomplete-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-slot);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.boss-autocomplete-input:focus {
+  border-color: var(--gold);
+  background: #151a24;
+}
+
+.boss-energy-summary {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.boss-energy-summary .energy-icon {
+  font-size: 1.1rem;
+}
+
+.boss-verdict-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(26, 32, 44, 0.95) 100%);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.15);
+}
+
+.boss-verdict-banner .verdict-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.boss-verdict-banner .verdict-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.boss-verdict-banner h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.boss-verdict-banner p {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.boss-ranked-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.boss-choice-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.boss-choice-card.rank-1 {
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.15);
+}
+
+.boss-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.boss-card-rank-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.boss-choice-card.rank-1 .boss-card-rank-badge {
+  color: var(--gold);
+}
+
+.boss-card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.boss-card-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.boss-drawback-box {
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.drawback-risk-low {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.drawback-risk-medium {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fde68a;
+}
+
+.drawback-risk-high, .drawback-risk-lethal {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.boss-mitigation-guide {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 10px;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   ? EVENT HELPER STYLES
+   ========================================================================== */
+.event-selector-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.event-search-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-search-wrapper label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.event-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-slot);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.event-search-input:focus {
+  border-color: var(--blue);
+  background: #151a24;
+}
+
+.event-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.chips-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.event-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.event-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #64748b;
+}
+
+.event-narrative-card {
+  background: #0f121a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+
+.narrative-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.narrative-header h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.narrative-text {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.event-verdict-banner {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(26, 32, 44, 0.95) 100%);
+  border: 1.5px solid rgba(59, 130, 246, 0.45);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.event-verdict-banner .verdict-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.event-verdict-banner .verdict-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #60a5fa;
+  margin-bottom: 4px;
+}
+
+.event-verdict-banner h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.12rem;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.event-verdict-banner p {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.event-options-heading {
+  margin-bottom: 12px;
+}
+
+.event-options-heading h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.event-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.event-option-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.event-option-card.recommended {
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+.event-opt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 8px;
+}
+
+.event-opt-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.event-opt-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.event-opt-reasoning {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+  line-height: 1.4;
+}
+
+
 

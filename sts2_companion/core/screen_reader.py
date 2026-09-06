@@ -505,6 +505,73 @@ class ScreenReader:
             logger.error(f"Error in grab_and_detect_shop: {e}")
             return {"success": False, "error": str(e), "cards": [], "relics": []}
 
+    async def detect_boss_relics(self, img: Image.Image) -> List[Dict[str, Any]]:
+        """Runs OCR on boss relic selection screen and matches the 3 offered relics."""
+        if not HAS_WINOCR:
+            return []
+
+        try:
+            ocr_result = await winocr.recognize_pil(img, "en")
+        except Exception as e:
+            logger.error(f"Boss relic OCR error: {e}")
+            return []
+
+        candidates = []
+        for line in ocr_result.lines:
+            text = line.text.strip()
+            norm = self._normalize(text)
+            if len(norm) < 3:
+                continue
+
+            matched_relic = None
+            if norm in self.normalized_relics:
+                matched_relic = self.normalized_relics[norm]
+            else:
+                for r_norm, r_info in self.normalized_relics.items():
+                    if abs(len(r_norm) - len(norm)) <= 3:
+                        ratio = difflib.SequenceMatcher(None, norm, r_norm).ratio()
+                        if ratio >= 0.85:
+                            matched_relic = r_info
+                            break
+
+            if matched_relic:
+                # Find bounding box center
+                xs = [w.bounding_rect.x for w in line.words]
+                center_x = sum(xs) / len(xs) if xs else 0
+                candidates.append({
+                    "name": matched_relic.get("name", ""),
+                    "id": matched_relic.get("id", ""),
+                    "center_x": center_x,
+                })
+
+        # Deduplicate and sort by horizontal position
+        candidates.sort(key=lambda c: c["center_x"])
+        unique_relics = []
+        seen = set()
+        for c in candidates:
+            if c["name"] not in seen:
+                unique_relics.append({"name": c["name"], "id": c["id"]})
+                seen.add(c["name"])
+
+        return unique_relics[:3]
+
+    def grab_and_detect_boss_relics(self) -> Dict[str, Any]:
+        """Captures screen and recognizes the 3 offered Boss Relics."""
+        img, source = self.capture()
+        if img is None:
+            return {"success": False, "error": source, "relics": []}
+
+        try:
+            relics = asyncio.run(self.detect_boss_relics(img))
+            return {
+                "success": True,
+                "source": source,
+                "relics": relics,
+            }
+        except Exception as e:
+            logger.error(f"Error in grab_and_detect_boss_relics: {e}")
+            return {"success": False, "error": str(e), "relics": []}
+
 
 _screen_reader_instance: Optional[ScreenReader] = None
 
