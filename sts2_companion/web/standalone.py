@@ -171,6 +171,28 @@ class STS2RequestHandler(BaseHTTPRequestHandler):
                 current_run = self.watcher.get_state()
                 result = self.ai_advisor.evaluate(resolved_ids, current_run, fallback_advisor=self.advisor)
                 self._send_json(result)
+            elif path == "/api/ai_chat":
+                try:
+                    data = json.loads(body)
+                except Exception:
+                    data = {}
+                user_message = str(data.get("message", "")).strip()
+                if not user_message:
+                    self._send_json({"success": False, "error": "No message provided."}, status=400)
+                    return
+                history = data.get("history", [])
+                card_ids_or_names = data.get("cards") or data.get("card_ids") or []
+                initial_recommendation = data.get("initial_recommendation")
+                resolved_ids = self._resolve_card_ids(card_ids_or_names)
+                current_run = self.watcher.get_state()
+                result = self.ai_advisor.chat_followup(
+                    user_message=user_message,
+                    history=history,
+                    offered_card_ids=resolved_ids,
+                    active_run=current_run,
+                    initial_recommendation=initial_recommendation,
+                )
+                self._send_json(result)
             elif path == "/api/config":
                 try:
                     data = json.loads(body)

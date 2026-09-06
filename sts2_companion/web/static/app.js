@@ -5,11 +5,16 @@
 let allCards = [];
 let allRelics = [];
 let currentState = null;
+let currentChatHistory = [];
+let lastEvaluatedCards = [];
+let lastAIRec = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
   setupAutocomplete();
   setupAdvisorActions();
+  setupAIChat();
+  setupDeckCoachActions();
   setupSettingsModal();
   setupSyncButton();
   loadInitialData();
@@ -37,6 +42,8 @@ function setupTabs() {
         loadHistoryStats();
       } else if (targetPaneId === "tabCompendium") {
         renderCompendium();
+      } else if (targetPaneId === "tabDeck") {
+        loadDeckAnalysis();
       }
     });
   });
@@ -253,6 +260,207 @@ function updateDeckAndRelics(state) {
   });
 }
 
+// ==========================================
+// GEMINI DECK ENGINE & PILOT COACH
+// ==========================================
+let currentDeckAnalysis = null;
+let deckChatHistory = [];
+
+async function loadDeckAnalysis(forceRefresh = false) {
+  const btn = document.getElementById("btnAnalyzeDeck");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>⏳</span> Analyzing Deck...`;
+  }
+
+  try {
+    const res = await fetch("/api/deck_analysis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ force_refresh: forceRefresh }),
+    });
+    const result = await res.json();
+    if (result.success && result.data) {
+      currentDeckAnalysis = result;
+      renderDeckAnalysis(result);
+    } else {
+      console.warn("Deck analysis note:", result.error);
+      const nameEl = document.getElementById("deckBuildName");
+      if (nameEl) nameEl.textContent = result.error || "No active run detected";
+    }
+  } catch (err) {
+    console.error("Failed to load deck analysis:", err);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<span>✨</span> Analyze Deck with Gemini`;
+    }
+  }
+}
+
+function renderDeckAnalysis(result) {
+  const data = result.data || {};
+  const stageEl = document.getElementById("deckBuildStage");
+  const nameEl = document.getElementById("deckBuildName");
+  const winconEl = document.getElementById("deckWinCondition");
+  const modelBadge = document.getElementById("deckEngineModelBadge");
+
+  if (stageEl) stageEl.textContent = data.build_stage || "CORE ENGINE FORMING";
+  if (nameEl) nameEl.textContent = data.build_name || "Archetype Identified";
+  if (winconEl) winconEl.textContent = data.core_win_condition || "Focus on compounding your card synergies and survivability.";
+  if (modelBadge) {
+    modelBadge.textContent = result.provider === "gemini" ? (result.model || "Gemini 2.5 Flash") : "Local Heuristic Engine";
+  }
+
+  // Playbook
+  const turnPriority = document.getElementById("coachTurnPriority");
+  if (turnPriority) turnPriority.textContent = data.playbook?.turn_1_2_priority || "Prioritize powers and vulnerable inflicters.";
+
+  const seqList = document.getElementById("coachSequencingList");
+  if (seqList) {
+    seqList.innerHTML = (data.playbook?.key_sequencing || []).map(s => `<li>${escapeHtml(s)}</li>`).join("");
+  }
+
+  const mitRule = document.getElementById("coachMitigationRule");
+  if (mitRule) mitRule.textContent = data.playbook?.mitigation_rule || "Balance block and attack based on incoming intent.";
+
+  // What to look for
+  const cardsList = document.getElementById("coachPriorityCards");
+  if (cardsList) {
+    cardsList.innerHTML = (data.what_to_look_for?.priority_cards || []).map(c => `
+      <div class="coach-item-chip"><strong>${escapeHtml(c.card_name)}</strong>: ${escapeHtml(c.why)}</div>
+    `).join("");
+  }
+
+  const relicsList = document.getElementById("coachPriorityRelics");
+  if (relicsList) {
+    relicsList.innerHTML = (data.what_to_look_for?.priority_relics || []).map(r => `
+      <div class="coach-item-chip"><strong>${escapeHtml(r.relic_name)}</strong>: ${escapeHtml(r.why)}</div>
+    `).join("");
+  }
+
+  const potionsList = document.getElementById("coachPriorityPotions");
+  if (potionsList) {
+    potionsList.innerHTML = (data.what_to_look_for?.priority_potions || []).map(p => `
+      <div class="coach-item-chip"><strong>${escapeHtml(p.potion_name)}</strong>: ${escapeHtml(p.why)}</div>
+    `).join("");
+  }
+
+  // What to avoid
+  const avoidList = document.getElementById("coachAvoidList");
+  if (avoidList) {
+    avoidList.innerHTML = (data.what_to_avoid || []).map(a => `
+      <div class="coach-avoid-item">
+        <strong>⚠️ ${escapeHtml(a.target)}</strong>
+        <span>${escapeHtml(a.danger_reason)}</span>
+      </div>
+    `).join("");
+  }
+
+  // Boss & Purge
+  const bossAssessment = document.getElementById("coachBossAssessment");
+  if (bossAssessment) bossAssessment.textContent = data.boss_matchup?.threat_assessment || "-";
+
+  const purgeList = document.getElementById("coachPurgeList");
+  if (purgeList) {
+    purgeList.innerHTML = (data.card_removal_priority || []).map(p => `
+      <div class="coach-purge-item">
+        <strong>🗑️ ${escapeHtml(p.card_name)}</strong>: ${escapeHtml(p.reason)}
+      </div>
+    `).join("");
+  }
+}
+
+function setupDeckCoachActions() {
+  const btnAnalyze = document.getElementById("btnAnalyzeDeck");
+  if (btnAnalyze) {
+    btnAnalyze.addEventListener("click", () => loadDeckAnalysis(true));
+  }
+
+  // Suggestion chips
+  document.querySelectorAll(".deck-suggest-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const q = chip.dataset.q;
+      const input = document.getElementById("deckChatInput");
+      if (input) {
+        input.value = q;
+        sendDeckChatMessage();
+      }
+    });
+  });
+
+  // Send message
+  const btnSend = document.getElementById("btnSendDeckChat");
+  const input = document.getElementById("deckChatInput");
+  if (btnSend && input) {
+    btnSend.addEventListener("click", sendDeckChatMessage);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendDeckChatMessage();
+    });
+  }
+}
+
+async function sendDeckChatMessage() {
+  const input = document.getElementById("deckChatInput");
+  const btn = document.getElementById("btnSendDeckChat");
+  const msgContainer = document.getElementById("deckChatMessages");
+  if (!input || !msgContainer) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Render user message
+  const userMsgEl = document.createElement("div");
+  userMsgEl.className = "ai-chat-msg user";
+  userMsgEl.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div>`;
+  msgContainer.appendChild(userMsgEl);
+  input.value = "";
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  // Render loading placeholder
+  const loadingEl = document.createElement("div");
+  loadingEl.className = "ai-chat-msg ai";
+  loadingEl.innerHTML = `<div class="msg-bubble ai-loading">Strategist is thinking...</div>`;
+  msgContainer.appendChild(loadingEl);
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/deck_chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        history: deckChatHistory,
+      }),
+    });
+    const result = await res.json();
+    loadingEl.remove();
+
+    const aiMsgEl = document.createElement("div");
+    aiMsgEl.className = "ai-chat-msg ai";
+
+    if (result.success && result.reply) {
+      aiMsgEl.innerHTML = `<div class="msg-bubble">${escapeHtml(result.reply)}</div>`;
+      deckChatHistory.push({ role: "user", content: text });
+      deckChatHistory.push({ role: "model", content: result.reply });
+    } else {
+      aiMsgEl.innerHTML = `<div class="msg-bubble error">⚠️ ${escapeHtml(result.error || "Failed to get reply.")}</div>`;
+    }
+    msgContainer.appendChild(aiMsgEl);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  } catch (err) {
+    loadingEl.remove();
+    const aiMsgEl = document.createElement("div");
+    aiMsgEl.className = "ai-chat-msg ai";
+    aiMsgEl.innerHTML = `<div class="msg-bubble error">⚠️ Network error: ${escapeHtml(err.message)}</div>`;
+    msgContainer.appendChild(aiMsgEl);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 // Card Reward Autocomplete
 function setupAutocomplete() {
   const slots = [1, 2, 3, 4];
@@ -362,6 +570,16 @@ function setupAdvisorActions() {
     }
   });
 
+  const btnRetryAI = document.getElementById("btnRetryAI");
+  if (btnRetryAI) {
+    btnRetryAI.addEventListener("click", runAIEvaluation);
+  }
+
+  const btnConfigAI = document.getElementById("btnConfigAI");
+  if (btnConfigAI) {
+    btnConfigAI.addEventListener("click", openSettingsModal);
+  }
+
   btnClear.addEventListener("click", () => {
     [1, 2, 3, 4].forEach(n => {
       document.getElementById(`slot${n}`).value = "";
@@ -369,8 +587,20 @@ function setupAdvisorActions() {
     document.getElementById("adviceResultsArea").classList.add("hidden");
     const aiCard = document.getElementById("aiAdvisorCard");
     if (aiCard) aiCard.classList.add("hidden");
+    const aiErrorNotice = document.getElementById("aiErrorNotice");
+    if (aiErrorNotice) aiErrorNotice.classList.add("hidden");
     const notice = document.getElementById("grabStatusNotice");
     if (notice) notice.classList.add("hidden");
+
+    currentChatHistory = [];
+    lastEvaluatedCards = [];
+    lastAIRec = null;
+    const chatMsgs = document.getElementById("aiChatMessages");
+    if (chatMsgs) chatMsgs.innerHTML = "";
+    const chatSugg = document.getElementById("aiChatSuggestions");
+    if (chatSugg) chatSugg.innerHTML = "";
+    const chatInput = document.getElementById("aiChatInput");
+    if (chatInput) chatInput.value = "";
   });
 
   btnLoadPending.addEventListener("click", () => {
@@ -512,16 +742,25 @@ async function runAIEvaluation() {
     return;
   }
 
+  lastEvaluatedCards = [...cards];
+  currentChatHistory = [];
+  const chatMsgs = document.getElementById("aiChatMessages");
+  if (chatMsgs) chatMsgs.innerHTML = "";
+
   const btnAskAI = document.getElementById("btnAskAI");
   const aiCard = document.getElementById("aiAdvisorCard");
   const keyNotice = document.getElementById("aiKeyNotice");
+  const aiErrorNotice = document.getElementById("aiErrorNotice");
+  const aiErrorMessage = document.getElementById("aiErrorMessage");
   const resultsArea = document.getElementById("adviceResultsArea");
 
   resultsArea.classList.remove("hidden");
+  if (aiErrorNotice) aiErrorNotice.classList.add("hidden");
+  if (keyNotice) keyNotice.classList.add("hidden");
 
   if (btnAskAI) {
     btnAskAI.classList.add("loading");
-    btnAskAI.innerHTML = `<span>⏳</span> Consulting Gemini 3.8 Flash...`;
+    btnAskAI.innerHTML = `<span>⏳</span> Consulting Gemini AI...`;
   }
 
   try {
@@ -532,19 +771,32 @@ async function runAIEvaluation() {
     });
     const data = await res.json();
 
-    if (!data.success && data.requires_api_key) {
-      if (keyNotice) keyNotice.classList.remove("hidden");
-      if (aiCard) aiCard.classList.add("hidden");
-      return;
-    }
-
     if (data.fallback_evaluation) {
       renderAdviceResults(data.fallback_evaluation);
+    }
+
+    if (!data.success) {
+      if (data.requires_api_key) {
+        if (keyNotice) keyNotice.classList.remove("hidden");
+        if (aiCard) aiCard.classList.add("hidden");
+        return;
+      }
+      if (aiErrorNotice && aiErrorMessage) {
+        aiErrorMessage.textContent = data.error || "Gemini evaluation could not be completed.";
+        aiErrorNotice.classList.remove("hidden");
+      }
+      if (aiCard) aiCard.classList.add("hidden");
+      return;
     }
 
     renderAIAdvice(data);
   } catch (err) {
     console.error("AI Evaluation error:", err);
+    if (aiErrorNotice && aiErrorMessage) {
+      aiErrorMessage.textContent = `Communication error with companion server: ${err.message || err}`;
+      aiErrorNotice.classList.remove("hidden");
+    }
+    if (aiCard) aiCard.classList.add("hidden");
   } finally {
     if (btnAskAI) {
       btnAskAI.classList.remove("loading");
@@ -556,6 +808,7 @@ async function runAIEvaluation() {
 function renderAIAdvice(data) {
   const aiCard = document.getElementById("aiAdvisorCard");
   const keyNotice = document.getElementById("aiKeyNotice");
+  const aiErrorNotice = document.getElementById("aiErrorNotice");
   if (!aiCard) return;
 
   if (!data || !data.success || !data.recommendation) {
@@ -567,11 +820,25 @@ function renderAIAdvice(data) {
   }
 
   if (keyNotice) keyNotice.classList.add("hidden");
+  if (aiErrorNotice) aiErrorNotice.classList.add("hidden");
   aiCard.classList.remove("hidden");
 
   const rec = data.recommendation;
+  lastAIRec = rec;
+
   const modelBadge = document.getElementById("aiModelBadge");
   if (modelBadge) modelBadge.textContent = data.model || "Gemini Flash";
+
+  const groundingBadge = document.getElementById("aiGroundingBadge");
+  if (groundingBadge) {
+    if (data.grounding_active) {
+      groundingBadge.textContent = "🔍 Web Grounded";
+      groundingBadge.style.display = "inline-block";
+    } else {
+      groundingBadge.textContent = "📦 STS2 DB & Save Grounded";
+      groundingBadge.style.display = "inline-block";
+    }
+  }
 
   const headline = document.getElementById("aiVerdictHeadline");
   if (headline) headline.textContent = rec.verdict || `Recommended: ${rec.recommended_card}`;
@@ -596,6 +863,236 @@ function renderAIAdvice(data) {
       });
     }
   }
+
+  // --- UNIFY MAIN RECOMMENDATION THROUGHLINE WITH GEMINI ---
+  // 1. Top Verdict Banner
+  const banner = document.getElementById("verdictBanner");
+  const verdictIcon = document.getElementById("verdictIcon");
+  const verdictTitle = document.getElementById("verdictTitle");
+  const verdictSub = document.getElementById("verdictSub");
+
+  if (banner && verdictTitle) {
+    if (rec.should_skip) {
+      banner.className = "verdict-banner skip";
+      if (verdictIcon) verdictIcon.textContent = "🛑";
+      verdictTitle.textContent = "RECOMMENDATION: SKIP CARD REWARD";
+      if (verdictSub) verdictSub.textContent = rec.verdict || "Gemini advises skipping this reward to protect deck density.";
+    } else {
+      banner.className = "verdict-banner";
+      if (verdictIcon) verdictIcon.textContent = "🏆";
+      verdictTitle.textContent = `RECOMMENDED: Pick ${rec.recommended_card}`;
+      if (verdictSub) verdictSub.textContent = rec.verdict || "";
+    }
+  }
+
+  // 2. Ranked Cards Grid: Reassign glowing gold .top-choice and attach Gemini tier badges/notes
+  const rankedCards = document.querySelectorAll(".ranked-card");
+  const cardEvaluations = rec.card_evaluations || [];
+  const evalMap = {};
+  cardEvaluations.forEach(ce => {
+    if (ce.name) evalMap[ce.name.toLowerCase()] = ce;
+  });
+
+  rankedCards.forEach(cardEl => {
+    const nameEl = cardEl.querySelector(".card-name");
+    if (!nameEl) return;
+    const cardName = nameEl.textContent.trim().toLowerCase();
+
+    // Reassign top-choice highlight
+    const isTopChoice = !rec.should_skip && (cardName === (rec.recommended_card || "").toLowerCase());
+    if (isTopChoice) {
+      cardEl.classList.add("top-choice");
+    } else {
+      cardEl.classList.remove("top-choice");
+    }
+
+    // Clean any prior AI badge/notes
+    const prevBadge = cardEl.querySelector(".ai-tier-badge");
+    if (prevBadge) prevBadge.remove();
+    const prevNote = cardEl.querySelector(".ai-card-note");
+    if (prevNote) prevNote.remove();
+
+    // Find Gemini evaluation for this card
+    const cardEval = evalMap[cardName];
+    if (cardEval) {
+      const tier = cardEval.verdict_tier || (isTopChoice ? "Top Pick" : "Situational");
+      let tierClass = "tier-situational";
+      const tLower = tier.toLowerCase();
+      if (tLower.includes("top")) tierClass = "tier-top-pick";
+      else if (tLower.includes("dilut")) tierClass = "tier-dilution";
+      else if (tLower.includes("skip")) tierClass = "tier-skip";
+
+      const badgeEl = document.createElement("span");
+      badgeEl.className = `ai-tier-badge ${tierClass}`;
+      badgeEl.textContent = tier;
+      const headerEl = cardEl.querySelector(".card-header");
+      if (headerEl) headerEl.appendChild(badgeEl);
+
+      if (cardEval.analysis) {
+        const noteEl = document.createElement("div");
+        noteEl.className = "ai-card-note";
+        noteEl.innerHTML = `<strong>Gemini Tactical Fit:</strong> ${escapeHtml(cardEval.analysis)}`;
+        const auditBox = cardEl.querySelector(".role-audit-box");
+        if (auditBox && auditBox.parentNode) {
+          auditBox.parentNode.insertBefore(noteEl, auditBox.nextSibling);
+        } else {
+          cardEl.appendChild(noteEl);
+        }
+      }
+    } else if (isTopChoice) {
+      const badgeEl = document.createElement("span");
+      badgeEl.className = "ai-tier-badge tier-top-pick";
+      badgeEl.textContent = "Top Pick";
+      const headerEl = cardEl.querySelector(".card-header");
+      if (headerEl) headerEl.appendChild(badgeEl);
+    }
+  });
+
+  // 3. Populate Refinement Suggestions
+  renderChatSuggestions(rec, lastEvaluatedCards);
+}
+
+// --- INTERACTIVE REFINING CHAT CONTROLLER ---
+function setupAIChat() {
+  const input = document.getElementById("aiChatInput");
+  const btnSend = document.getElementById("btnSendAIChat");
+
+  if (btnSend) {
+    btnSend.addEventListener("click", sendAIChatMessage);
+  }
+
+  if (input) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendAIChatMessage();
+      }
+    });
+  }
+}
+
+function renderChatSuggestions(rec, cards) {
+  const container = document.getElementById("aiChatSuggestions");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const suggestions = [];
+  const recommended = (rec && rec.recommended_card) || "";
+
+  // Suggest comparing against other offered cards
+  (cards || []).forEach(c => {
+    if (c.trim().toLowerCase() !== recommended.toLowerCase()) {
+      suggestions.push(`What if I take ${c.trim()} instead?`);
+    }
+  });
+
+  suggestions.push("How does this choice prepare for the Act boss?");
+  suggestions.push("What should my next campfire upgrade be?");
+  suggestions.push("Which combat encounters should I be most careful of?");
+
+  suggestions.slice(0, 4).forEach(promptText => {
+    const chip = document.createElement("button");
+    chip.className = "ai-suggestion-chip";
+    chip.textContent = promptText;
+    chip.addEventListener("click", () => {
+      const input = document.getElementById("aiChatInput");
+      if (input) {
+        input.value = promptText;
+        sendAIChatMessage();
+      }
+    });
+    container.appendChild(chip);
+  });
+}
+
+async function sendAIChatMessage() {
+  const input = document.getElementById("aiChatInput");
+  const btnSend = document.getElementById("btnSendAIChat");
+  const messagesContainer = document.getElementById("aiChatMessages");
+  if (!input || !messagesContainer) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+
+  // Render User Bubble
+  const userBubble = document.createElement("div");
+  userBubble.className = "ai-message-bubble user";
+  userBubble.textContent = text;
+  messagesContainer.appendChild(userBubble);
+
+  // Render Loading Indicator
+  const loadingBubble = document.createElement("div");
+  loadingBubble.className = "ai-message-bubble ai loading";
+  loadingBubble.innerHTML = `<span>🧠</span> Gemini is analyzing your question...`;
+  messagesContainer.appendChild(loadingBubble);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+  if (btnSend) {
+    btnSend.disabled = true;
+  }
+
+  try {
+    const res = await fetch("/api/ai_chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        history: currentChatHistory,
+        cards: lastEvaluatedCards,
+        initial_recommendation: lastAIRec,
+      }),
+    });
+
+    const data = await res.json();
+    loadingBubble.remove();
+
+    if (data.success && data.reply) {
+      const aiBubble = document.createElement("div");
+      aiBubble.className = "ai-message-bubble ai";
+      aiBubble.innerHTML = formatMarkdown(data.reply);
+      messagesContainer.appendChild(aiBubble);
+
+      currentChatHistory.push({ role: "user", content: text });
+      currentChatHistory.push({ role: "model", content: data.reply });
+    } else {
+      const errBubble = document.createElement("div");
+      errBubble.className = "ai-message-bubble ai";
+      errBubble.style.borderColor = "#ef4444";
+      errBubble.innerHTML = `<strong>Error:</strong> ${escapeHtml(data.error || "Failed to get advice from Gemini.")}`;
+      messagesContainer.appendChild(errBubble);
+    }
+  } catch (err) {
+    loadingBubble.remove();
+    const errBubble = document.createElement("div");
+    errBubble.className = "ai-message-bubble ai";
+    errBubble.style.borderColor = "#ef4444";
+    errBubble.innerHTML = `<strong>Network Error:</strong> ${escapeHtml(err.message)}`;
+    messagesContainer.appendChild(errBubble);
+  } finally {
+    if (btnSend) {
+      btnSend.disabled = false;
+    }
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+}
+
+function formatMarkdown(text) {
+  if (!text) return "";
+  let html = escapeHtml(text);
+  // Bold **text**
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  // Italic *text*
+  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+  // Bullet lists (- item)
+  html = html.replace(/(?:^|\n)-\s+(.*?)(?=\n|$)/g, "<li>$1</li>");
+  html = html.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+  // Paragraphs
+  html = html.replace(/\n\n+/g, "</p><p>");
+  html = `<p>${html}</p>`;
+  html = html.replace(/<p>\s*<\/p>/g, "");
+  return html;
 }
 
 // Settings Modal Controller

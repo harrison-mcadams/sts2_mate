@@ -147,7 +147,7 @@ class STS2LiveWatcher:
                         reward_opts = parsed.get("pending_reward") or []
                         if reward_opts:
                             card_names = [c.get("name", c.get("id")) for c in reward_opts]
-                            print(f"\n[+] 🎁 LIVE CARD REWARD OFFERED: {' | '.join(card_names)}", flush=True)
+                            print(f"\n[+] [REWARD] LIVE CARD REWARD OFFERED: {' | '.join(card_names)}", flush=True)
                         else:
                             print(f"\n[+] >>> LIVE RUN ACTIVE! Floor {parsed.get('current_floor', 1)} | HP: {parsed.get('current_hp')}/{parsed.get('max_hp')} | {parsed.get('character', 'Hero')} <<<", flush=True)
             except Exception as e:

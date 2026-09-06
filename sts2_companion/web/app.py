@@ -15,6 +15,7 @@ from ..core.save_parser import STS2SaveParser
 from ..core.watcher import STS2LiveWatcher
 from ..advisor.evaluator import STS2CardRewardAdvisor
 from ..advisor.ai_advisor import GeminiSTS2Advisor
+from ..advisor.deck_engine import GeminiDeckEngine
 from ..core.paths import get_default_save_dir
 from ..core.config import get_gemini_api_key, get_gemini_model, load_config, save_config
 
@@ -31,6 +32,7 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
     watcher = STS2LiveWatcher(profile_dir=effective_save, data_dir=data_dir) if effective_save else STS2LiveWatcher(data_dir=data_dir)
     advisor = STS2CardRewardAdvisor(parser.cards_db, mined_stats)
     ai_advisor = GeminiSTS2Advisor(parser.cards_db, parser.relics_db, mined_stats)
+    deck_engine = GeminiDeckEngine(parser.cards_db, parser.relics_db, mined_stats)
 
     # Event queue for SSE updates
     event_queues: List[queue.Queue] = []
@@ -155,6 +157,42 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         result = ai_advisor.evaluate(resolved_ids, current_run, fallback_advisor=advisor)
         return jsonify(result)
 
+    @app.route("/api/ai_chat", methods=["POST"])
+    def ai_chat():
+        data = request.get_json() or {}
+        user_message = str(data.get("message", "")).strip()
+        if not user_message:
+            return jsonify({"success": False, "error": "No message provided."}), 400
+
+        history = data.get("history", [])
+        card_ids_or_names = data.get("cards") or data.get("card_ids") or []
+        initial_recommendation = data.get("initial_recommendation")
+
+        resolved_ids = []
+        for item in card_ids_or_names:
+            item_str = str(item).strip()
+            if item_str.startswith("CARD.") and item_str in parser.cards_db:
+                resolved_ids.append(item_str)
+            else:
+                matched = False
+                for cid, cinfo in parser.cards_db.items():
+                    if cinfo.get("name", "").lower() == item_str.lower():
+                        resolved_ids.append(cid)
+                        matched = True
+                        break
+                if not matched:
+                    resolved_ids.append(f"CARD.{item_str.upper().replace(' ', '_')}")
+
+        current_run = watcher.get_state()
+        result = ai_advisor.chat_followup(
+            user_message=user_message,
+            history=history,
+            offered_card_ids=resolved_ids,
+            active_run=current_run,
+            initial_recommendation=initial_recommendation,
+        )
+        return jsonify(result)
+
     @app.route("/api/config", methods=["GET", "POST"])
     def handle_config():
         if request.method == "POST":
@@ -235,6 +273,35 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
 
+    @app.route("/api/deck_analysis", methods=["POST"])
+    def analyze_deck():
+        data = request.get_json() or {}
+        force = bool(data.get("force_refresh", False))
+        current_run = watcher.get_state()
+        if not current_run or not current_run.get("deck"):
+            return jsonify({
+                "success": False,
+                "error": "No active run or deck found. Launch Slay the Spire 2 or start a run to analyze."
+            }), 400
+
+        result = deck_engine.analyze_deck(current_run, force_refresh=force)
+        return jsonify(result)
+
+    @app.route("/api/deck_chat", methods=["POST"])
+    def chat_deck_strategy():
+        data = request.get_json() or {}
+        user_msg = str(data.get("message", "")).strip()
+        if not user_msg:
+            return jsonify({"success": False, "error": "No message provided."}), 400
+
+        history = data.get("history", [])
+        current_run = watcher.get_state()
+        if not current_run or not current_run.get("deck"):
+            return jsonify({"success": False, "error": "No active deck loaded to discuss."}), 400
+
+        result = deck_engine.chat_about_deck(user_msg, current_run, conversation_history=history)
+        return jsonify(result)
+
     @app.route("/api/sync", methods=["POST"])
     def resync_database():
         try:
@@ -244,6 +311,8 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
             advisor.cards_db = parser.cards_db
             ai_advisor.cards_db = parser.cards_db
             ai_advisor.relics_db = parser.relics_db
+            deck_engine.cards_db = parser.cards_db
+            deck_engine.relics_db = parser.relics_db
             return jsonify({"success": True, "extracted": res})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500

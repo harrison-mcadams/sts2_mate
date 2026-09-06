@@ -175,6 +175,32 @@
             <div class="ai-detail-box" id="aiSynergiesBox">
               <div class="ai-detail-title">⚡ Deck & Relic Synergies</div>
               <ul class="ai-synergy-list" id="aiSynergies"></ul>
+          </div>
+
+          <!-- Interactive Refining Conversation Thread -->
+          <div class="ai-chat-section" id="aiChatSection">
+            <div class="ai-chat-header">
+              <div class="ai-chat-title-group">
+                <span class="ai-chat-icon">💬</span>
+                <div>
+                  <div class="ai-chat-title">Refine Strategy with Gemini</div>
+                  <div class="ai-chat-subtitle">Ask follow-up questions about alternative picks, boss preparation, or upgrade priority.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Suggestion Prompts -->
+            <div class="ai-chat-suggestions" id="aiChatSuggestions"></div>
+
+            <!-- Messages Log -->
+            <div class="ai-chat-messages" id="aiChatMessages"></div>
+
+            <!-- Input Row -->
+            <div class="ai-chat-input-row">
+              <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Ask a refining question (e.g. 'What if I take Bludgeon instead?')..." autocomplete="off">
+              <button id="btnSendAIChat" class="btn-primary btn-chat-send" title="Send Question (Enter)">
+                <span>Send</span> ➔
+              </button>
             </div>
           </div>
         </div>
@@ -188,6 +214,18 @@
             </div>
           </div>
           <button id="btnOpenKeyModal" class="btn-sm btn-primary">Configure Key</button>
+        </div>
+
+        <!-- Gemini AI Error Banner -->
+        <div id="aiErrorNotice" class="ai-error-notice hidden">
+          <div class="error-notice-content">
+            <span class="error-icon">⚠️</span>
+            <div id="aiErrorMessage">Gemini API error occurred.</div>
+          </div>
+          <div class="error-actions">
+            <button id="btnRetryAI" class="btn-sm btn-secondary">Retry</button>
+            <button id="btnConfigAI" class="btn-sm btn-outline">Settings</button>
+          </div>
         </div>
 
         <!-- Main Local Verdict Banner -->
@@ -210,8 +248,114 @@
     <section id="tabDeck" class="tab-pane">
       <div class="pane-header">
         <div class="pane-title-group">
-          <h2>Active Deck & Relics</h2>
-          <p class="pane-subtitle">Live inspection of your current run's deck composition and equipped relics.</p>
+          <h2>Deck Engine & Pilot Coach</h2>
+          <p class="pane-subtitle">Gemini-powered strategic analysis: archetype trajectory, combat playbooks, wishlists, and anti-synergies.</p>
+        </div>
+        <div class="deck-actions-group">
+          <button id="btnAnalyzeDeck" class="btn-primary btn-sparkle" title="Analyze your active deck with Gemini">
+            <span>✨</span> Analyze Deck with Gemini
+          </button>
+        </div>
+      </div>
+
+      <!-- Gemini Deck Coach Overview Banner -->
+      <div id="deckCoachContainer" class="deck-coach-container">
+        <!-- Archetype & Win Condition Hero Banner -->
+        <div class="deck-hero-banner" id="deckHeroBanner">
+          <div class="deck-hero-left">
+            <div class="deck-archetype-tag" id="deckBuildStage">STARTER TRANSITION</div>
+            <h3 class="deck-archetype-title" id="deckBuildName">Analyzing Active Deck...</h3>
+            <p class="deck-wincon-text" id="deckWinCondition">Start or load a run to evaluate your deck's core win conditions and turn sequencing.</p>
+          </div>
+          <div class="deck-hero-meta">
+            <span class="ai-tag" id="deckEngineModelBadge">Gemini 2.5 Flash</span>
+          </div>
+        </div>
+
+        <!-- 4-Column Strategy Grid -->
+        <div class="deck-coach-grid">
+          <!-- Column 1: Combat Playbook -->
+          <div class="deck-coach-card">
+            <div class="deck-coach-card-header">
+              <span class="coach-icon">🎮</span>
+              <h4>Combat Playbook</h4>
+            </div>
+            <div class="coach-card-body" id="coachPlaybookBody">
+              <div class="coach-sub-title">Opening Turns (1–2):</div>
+              <p id="coachTurnPriority" class="coach-text-p">Loading setup priorities...</p>
+              <div class="coach-sub-title">Sequencing Rules:</div>
+              <ul id="coachSequencingList" class="coach-bullet-list"></ul>
+              <div class="coach-sub-title">Mitigation vs. Race:</div>
+              <p id="coachMitigationRule" class="coach-text-p">-</p>
+            </div>
+          </div>
+
+          <!-- Column 2: What to Look For (Wishlist) -->
+          <div class="deck-coach-card">
+            <div class="deck-coach-card-header">
+              <span class="coach-icon">🎯</span>
+              <h4>What to Look For</h4>
+            </div>
+            <div class="coach-card-body" id="coachWishlistBody">
+              <div class="coach-sub-title">Target Cards:</div>
+              <div id="coachPriorityCards" class="coach-chip-list"></div>
+              <div class="coach-sub-title">Target Relics:</div>
+              <div id="coachPriorityRelics" class="coach-chip-list"></div>
+              <div class="coach-sub-title">Potion Safety Net:</div>
+              <div id="coachPriorityPotions" class="coach-chip-list"></div>
+            </div>
+          </div>
+
+          <!-- Column 3: What to Avoid (Anti-Synergies) -->
+          <div class="deck-coach-card">
+            <div class="deck-coach-card-header">
+              <span class="coach-icon">🚫</span>
+              <h4>What to Avoid</h4>
+            </div>
+            <div class="coach-card-body" id="coachAvoidBody">
+              <div id="coachAvoidList" class="coach-avoid-container"></div>
+            </div>
+          </div>
+
+          <!-- Column 4: Boss & Removal Priority -->
+          <div class="deck-coach-card">
+            <div class="deck-coach-card-header">
+              <span class="coach-icon">🛡️</span>
+              <h4>Boss & Shop Removal</h4>
+            </div>
+            <div class="coach-card-body" id="coachBossBody">
+              <div class="coach-sub-title">Threat Assessment:</div>
+              <p id="coachBossAssessment" class="coach-text-p">Loading threat evaluation...</p>
+              <div class="coach-sub-title">Card Removal Targets:</div>
+              <div id="coachPurgeList" class="coach-purge-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Deck Strategist Chatbox -->
+        <div class="deck-chat-container">
+          <div class="deck-chat-header">
+            <div class="deck-chat-title-group">
+              <span class="ai-chat-icon">💬</span>
+              <div>
+                <div class="ai-chat-title">Consult the Deck Strategist</div>
+                <div class="ai-chat-subtitle">Ask Gemini any question about card removes, pathing, or how to pilot against specific enemies.</div>
+              </div>
+            </div>
+          </div>
+          <div class="deck-chat-suggestions" id="deckChatSuggestions">
+            <button class="deck-suggest-chip" data-q="What card should I remove at the next shop?">🗑️ What should I remove next?</button>
+            <button class="deck-suggest-chip" data-q="How do I pilot this deck against the upcoming Act Boss?">🛡️ How do I beat the Act Boss?</button>
+            <button class="deck-suggest-chip" data-q="What cards or powers would complete this archetype?">⚡ What cards complete this deck?</button>
+            <button class="deck-suggest-chip" data-q="Is this deck ready to fight Elites on this floor?">💀 Can I fight Elites right now?</button>
+          </div>
+          <div class="deck-chat-messages" id="deckChatMessages"></div>
+          <div class="ai-chat-input-row">
+            <input type="text" id="deckChatInput" class="ai-chat-input" placeholder="Ask a question about your deck or upcoming decisions..." autocomplete="off">
+            <button id="btnSendDeckChat" class="btn-primary btn-chat-send">
+              <span>Send</span> ➔
+            </button>
+          </div>
         </div>
       </div>
 

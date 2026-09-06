@@ -198,20 +198,44 @@ You MUST respond ONLY with a valid JSON object following this exact schema:
             "Content-Type": "application/json",
         }
 
+        grounding_used = bool(use_search and "tools" in payload)
+
         try:
             resp = requests.post(url, headers=headers, json=payload, timeout=12.0)
-            if resp.status_code != 200:
-                # If Google Search Grounding with responseMimeType failed, try fallback without search tool
-                if use_search and resp.status_code in {400, 404}:
-                    payload.pop("tools", None)
-                    resp = requests.post(url, headers=headers, json=payload, timeout=10.0)
+            
+            # 1. If Google Search Grounding caused quota 429 or bad request, retry immediately without search tool
+            if resp.status_code in {400, 404, 429} and "tools" in payload:
+                payload.pop("tools", None)
+                grounding_used = False
+                resp = requests.post(url, headers=headers, json=payload, timeout=12.0)
+
+            # 2. If model returned 503 (high demand) or 429 quota, fallback cascade
+            if resp.status_code in {503, 429}:
+                fallback_chain = ["gemini-3.7-flash", "gemini-3.5-flash-lite"]
+                payload.pop("tools", None)
+                grounding_used = False
+                for fallback_model in fallback_chain:
+                    if fallback_model == effective_model:
+                        continue
+                    fallback_url = f"{GEMINI_API_BASE}/{fallback_model}:generateContent?key={effective_key}"
+                    fallback_resp = requests.post(fallback_url, headers=headers, json=payload, timeout=12.0)
+                    if fallback_resp.status_code == 200:
+                        resp = fallback_resp
+                        effective_model = fallback_model
+                        break
 
             if resp.status_code != 200:
                 err_body = resp.text[:300]
                 logger.error(f"Gemini API error ({resp.status_code}): {err_body}")
+                user_msg = f"Gemini API error ({resp.status_code})."
+                if resp.status_code == 429:
+                    user_msg = "Google Gemini quota limit reached for this API key. If you are on a free tier, wait a moment before retrying, or check Google AI Studio quota limits."
+                elif resp.status_code == 503:
+                    user_msg = "Gemini is currently experiencing high demand at Google AI Studio. Please retry in a few seconds."
                 return {
                     "success": False,
-                    "error": f"Gemini API returned status {resp.status_code}: {err_body}",
+                    "error": user_msg,
+                    "raw_error": err_body,
                 }
 
             data = resp.json()
@@ -234,13 +258,14 @@ You MUST respond ONLY with a valid JSON object following this exact schema:
             return {
                 "success": True,
                 "model": effective_model,
+                "grounding_active": grounding_used,
                 "data": parsed,
             }
 
         except requests.exceptions.Timeout:
-            return {"success": False, "error": "Gemini API request timed out (12s limit)."}
+            return {"success": False, "error": "Gemini API request timed out (12s limit). Please check your internet connection."}
         except requests.exceptions.RequestException as e:
-            return {"success": False, "error": f"Network error calling Gemini: {str(e)}"}
+            return {"success": False, "error": f"Network error calling Gemini API: {str(e)}"}
         except Exception as e:
             return {"success": False, "error": f"Unexpected error in call_gemini: {str(e)}"}
 
@@ -332,7 +357,149 @@ You MUST respond ONLY with a valid JSON object following this exact schema:
             "success": True,
             "provider": "gemini",
             "model": ai_res.get("model"),
+            "grounding_active": ai_res.get("grounding_active", False),
             "recommendation": ai_res.get("data"),
             "fallback_evaluation": fallback_eval,
             "offered_cards": offered_cards,
         }
+
+    def chat_followup(
+        self,
+        user_message: str,
+        history: List[Dict[str, str]],
+        offered_card_ids: List[str],
+        active_run: Dict[str, Any],
+        initial_recommendation: Optional[Dict[str, Any]] = None,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Conducts multi-turn conversational follow-up to refine advice or answer
+        strategic questions about alternative cards, upcoming bosses, or upgrade priority.
+        """
+        effective_key = api_key or get_gemini_api_key()
+        if not effective_key:
+            return {
+                "success": False,
+                "error": "No Gemini API key configured. Please provide an API key in settings.",
+                "requires_key": True,
+            }
+
+        offered_cards = []
+        for cid in offered_card_ids:
+            cinfo = self.cards_db.get(cid)
+            if cinfo:
+                offered_cards.append(cinfo)
+            else:
+                offered_cards.append({
+                    "id": cid,
+                    "name": cid.replace("CARD.", "").replace("_", " ").title(),
+                    "card_type": "Skill",
+                    "rarity": "Common",
+                    "cost": 1,
+                    "description": "",
+                })
+
+        base_context_prompt = self.build_prompt(offered_cards, active_run)
+        system_instruction = (
+            "You are an elite competitive coach for Slay the Spire 2 (STS2).\n"
+            "CRITICAL: STS2 is a brand-new sequel. Never assume STS1 rules or synergies. Rely strictly on the grounded STS2 database context provided.\n"
+            "Keep your conversational responses direct, actionable, and tactically precise."
+        )
+
+        contents: List[Dict[str, Any]] = [
+            {
+                "role": "user",
+                "parts": [{"text": f"{system_instruction}\n\nHere is the current run state and card choices:\n{base_context_prompt}"}]
+            }
+        ]
+
+        if initial_recommendation:
+            rec_card = initial_recommendation.get("recommended_card", "")
+            verdict = initial_recommendation.get("verdict", "")
+            reasoning = initial_recommendation.get("tactical_reasoning", "")
+            initial_reply = f"My tactical recommendation is **{rec_card}**.\nVerdict: {verdict}\n\nStrategic reasoning: {reasoning}"
+            contents.append({
+                "role": "model",
+                "parts": [{"text": initial_reply}]
+            })
+        else:
+            contents.append({
+                "role": "model",
+                "parts": [{"text": "I have analyzed your current STS2 run state and offered cards. What strategic question can I answer?"}]
+            })
+
+        for msg in (history or []):
+            r = "user" if msg.get("role") == "user" else "model"
+            txt = (msg.get("content") or "").strip()
+            if txt:
+                contents.append({
+                    "role": r,
+                    "parts": [{"text": txt}]
+                })
+
+        contents.append({
+            "role": "user",
+            "parts": [{"text": user_message.strip()}]
+        })
+
+        effective_model = model or get_gemini_model()
+        url = f"{GEMINI_API_BASE}/{effective_model}:generateContent?key={effective_key}"
+
+        payload: Dict[str, Any] = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.35,
+                "maxOutputTokens": 2048,
+            }
+        }
+
+        headers = {"Content-Type": "application/json"}
+
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=15.0)
+
+            if resp.status_code in {503, 429}:
+                fallback_chain = ["gemini-3.7-flash", "gemini-3.5-flash-lite"]
+                for fallback_model in fallback_chain:
+                    if fallback_model == effective_model:
+                        continue
+                    fb_url = f"{GEMINI_API_BASE}/{fallback_model}:generateContent?key={effective_key}"
+                    fb_resp = requests.post(fb_url, headers=headers, json=payload, timeout=15.0)
+                    if fb_resp.status_code == 200:
+                        resp = fb_resp
+                        effective_model = fallback_model
+                        break
+
+            if resp.status_code != 200:
+                err_body = resp.text[:300]
+                logger.error(f"Gemini API chat error ({resp.status_code}): {err_body}")
+                user_msg = f"Gemini API error ({resp.status_code})."
+                if resp.status_code == 429:
+                    user_msg = "Google Gemini quota limit reached for this API key."
+                elif resp.status_code == 503:
+                    user_msg = "Gemini is currently experiencing high demand. Please retry shortly."
+                return {
+                    "success": False,
+                    "error": user_msg,
+                }
+
+            data = resp.json()
+            candidates = data.get("candidates", [])
+            if not candidates:
+                return {"success": False, "error": "No response candidate returned."}
+
+            parts = candidates[0].get("content", {}).get("parts", [])
+            raw_text = "".join(p.get("text", "") for p in parts if "text" in p).strip()
+
+            return {
+                "success": True,
+                "model": effective_model,
+                "reply": raw_text,
+            }
+        except requests.exceptions.Timeout:
+            return {"success": False, "error": "Gemini API request timed out (15s limit)."}
+        except requests.exceptions.RequestException as e:
+            return {"success": False, "error": f"Network error calling Gemini API: {str(e)}"}
+        except Exception as e:
+            return {"success": False, "error": f"Unexpected chat error: {str(e)}"}

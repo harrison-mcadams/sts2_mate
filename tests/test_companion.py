@@ -205,6 +205,27 @@ class TestSTS2Companion(unittest.TestCase):
             self.assertTrue(eval_data.get("requires_api_key") or "error" in eval_data)
             self.assertIsNotNone(eval_data.get("fallback_evaluation"))
 
+    def test_gemini_ai_chat_endpoint(self):
+        """Verify POST /api/ai_chat validation and response handling."""
+        # Bad request: empty message
+        bad_res = self.client.post("/api/ai_chat", json={"message": ""})
+        self.assertEqual(bad_res.status_code, 400)
+
+        # Valid payload format
+        res = self.client.post("/api/ai_chat", json={
+            "message": "What if I take Bludgeon instead?",
+            "cards": ["Sword Boomerang", "Whirlwind", "Bludgeon"],
+            "initial_recommendation": {
+                "recommended_card": "Whirlwind",
+                "verdict": "Pick Whirlwind"
+            }
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("success", data)
+        if not data.get("success"):
+            self.assertTrue(data.get("requires_key") or "error" in data)
+
 
 if __name__ == "__main__":
     unittest.main()

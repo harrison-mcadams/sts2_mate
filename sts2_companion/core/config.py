@@ -14,7 +14,7 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "companion_config.json")
 DEFAULT_CONFIG: Dict[str, Any] = {
     "gemini_api_key": "",
     "gemini_model": "gemini-3.8-flash",
-    "enable_search_grounding": True,
+    "enable_search_grounding": False,
 }
 
 
