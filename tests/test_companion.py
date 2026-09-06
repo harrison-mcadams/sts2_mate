@@ -137,6 +137,74 @@ class TestSTS2Companion(unittest.TestCase):
         self.assertGreater(len(twin_opt["relic_combos"]), 0)
         self.assertEqual(twin_opt["relic_combos"][0]["relic"], "Akabeko")
 
+    def test_gemini_config_manager(self):
+        """Verify configuration loading and saving."""
+        from sts2_companion.core.config import load_config, save_config, get_gemini_model
+        initial_cfg = load_config()
+        self.assertIn("gemini_model", initial_cfg)
+
+        save_config({"gemini_model": "gemini-2.5-flash", "enable_search_grounding": True})
+        self.assertEqual(get_gemini_model(), "gemini-2.5-flash")
+
+    def test_gemini_prompt_builder_and_guardrails(self):
+        """Verify Gemini prompt contains authoritative STS2 ground-truth and anti-STS1 directives."""
+        from sts2_companion.advisor.ai_advisor import GeminiSTS2Advisor
+        ai_adv = GeminiSTS2Advisor(self.parser.cards_db, self.parser.relics_db, self.player_stats)
+
+        mock_run = {
+            "character": "Ironclad",
+            "current_floor": 8,
+            "current_act": 1,
+            "ascension": 9,
+            "current_hp": 61,
+            "max_hp": 71,
+            "gold": 208,
+            "deck": [
+                {"name": "Bash", "card_type": "Attack", "cost": 1},
+                {"name": "Defend", "card_type": "Skill", "cost": 1},
+            ],
+            "relics": [{"name": "Burning Blood", "description": "Heal 6 HP at end of combat."}],
+        }
+        offered = [
+            self.parser.get_card_info("CARD.SWORD_BOOMERANG"),
+            self.parser.get_card_info("CARD.WHIRLWIND"),
+            self.parser.get_card_info("CARD.BLUDGEON"),
+        ]
+
+        prompt = ai_adv.build_prompt(offered, mock_run)
+
+        # Verify strict STS2 guardrails
+        self.assertIn("Slay the Spire 2", prompt)
+        self.assertIn("NEVER assume rules, card stats, or relic synergies from Slay the Spire 1", prompt)
+        self.assertIn("Whirlwind", prompt)
+        self.assertIn("Sword Boomerang", prompt)
+        self.assertIn("Bludgeon", prompt)
+        self.assertIn("Burning Blood", prompt)
+        self.assertIn("Act 1", prompt)
+
+    def test_gemini_ai_endpoints(self):
+        """Verify /api/config and /api/ai_evaluate endpoints."""
+        # GET /api/config
+        res = self.client.get("/api/config")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("gemini_api_key_configured", data)
+        self.assertIn("gemini_model", data)
+
+        # POST /api/config
+        post_res = self.client.post("/api/config", json={"gemini_model": "gemini-2.5-flash"})
+        self.assertEqual(post_res.status_code, 200)
+        self.assertEqual(post_res.get_json()["config"]["gemini_model"], "gemini-2.5-flash")
+
+        # POST /api/ai_evaluate without key returns requires_api_key: True and fallback
+        ai_res = self.client.post("/api/ai_evaluate", json={"cards": ["Whirlwind", "Sword Boomerang", "Bludgeon"]})
+        self.assertEqual(ai_res.status_code, 200)
+        eval_data = ai_res.get_json()
+        # In test environment without key, it should gracefully fall back
+        if not eval_data.get("success"):
+            self.assertTrue(eval_data.get("requires_api_key") or "error" in eval_data)
+            self.assertIsNotNone(eval_data.get("fallback_evaluation"))
+
 
 if __name__ == "__main__":
     unittest.main()

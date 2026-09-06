@@ -56,6 +56,9 @@
     </div>
 
     <div class="hud-right">
+      <button id="btnSettings" class="hud-btn" title="Configure Gemini 3.8 Flash AI Settings">
+        <span class="icon">⚙️</span> AI Settings
+      </button>
       <button id="btnSyncDb" class="hud-btn" title="Re-sync cards & relics directly from STS2 game installation">
         <span class="icon">🔄</span> Re-sync DB
       </button>
@@ -133,10 +136,13 @@
 
         <div class="action-row">
           <button id="btnScreenGrab" class="btn-primary btn-grab" title="Captures PC screen, reads card names with Windows OCR, and evaluates automatically (Hotkey: G)">
-            <span>📸</span> Grab from Screen (PC)
+            <span>📸</span> Grab Screen (PC)
           </button>
           <button id="btnEvaluate" class="btn-primary">
-            <span>✨</span> Evaluate Card Reward
+            <span>✨</span> Quick Evaluate
+          </button>
+          <button id="btnAskAI" class="btn-primary btn-ai" title="Ask Gemini 3.8 Flash for deep strategic advice with live STS2 run context">
+            <span>🧠</span> Ask Gemini AI
           </button>
           <button id="btnClearSlots" class="btn-secondary">Clear</button>
         </div>
@@ -145,12 +151,51 @@
 
       <!-- Advice Results Area -->
       <div id="adviceResultsArea" class="advice-results-area hidden">
-        <!-- Main Verdict Banner -->
+        <!-- Gemini AI Strategic Analysis Card -->
+        <div id="aiAdvisorCard" class="ai-advisor-card hidden">
+          <div class="ai-header">
+            <div class="ai-title">
+              <span class="ai-badge">GEMINI 3.8 FLASH</span>
+              <span class="ai-label">STS2 Tactical Analysis</span>
+            </div>
+            <div class="ai-meta">
+              <span id="aiGroundingBadge" class="ai-tag">🔍 Search Grounded</span>
+              <span id="aiModelBadge" class="ai-tag">gemini-2.5-flash</span>
+            </div>
+          </div>
+          <div id="aiVerdictBox" class="ai-verdict-box">
+            <div class="ai-verdict-headline" id="aiVerdictHeadline">Evaluating with Gemini...</div>
+            <div class="ai-reasoning" id="aiReasoning"></div>
+          </div>
+          <div class="ai-details-grid">
+            <div class="ai-detail-box" id="aiThreatPrepBox">
+              <div class="ai-detail-title">🛡️ Upcoming Threat Preparation</div>
+              <div class="ai-detail-content" id="aiThreatPrep"></div>
+            </div>
+            <div class="ai-detail-box" id="aiSynergiesBox">
+              <div class="ai-detail-title">⚡ Deck & Relic Synergies</div>
+              <ul class="ai-synergy-list" id="aiSynergies"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Missing API Key Notice -->
+        <div id="aiKeyNotice" class="ai-key-notice hidden">
+          <div class="key-notice-content">
+            <span class="key-icon">🔑</span>
+            <div>
+              <strong>Gemini API Key Required:</strong> Connect your Gemini API key to activate Gemini 3.8 Flash deep strategic reasoning.
+            </div>
+          </div>
+          <button id="btnOpenKeyModal" class="btn-sm btn-primary">Configure Key</button>
+        </div>
+
+        <!-- Main Local Verdict Banner -->
         <div id="verdictBanner" class="verdict-banner">
           <div class="verdict-icon" id="verdictIcon">🏆</div>
           <div class="verdict-text-group">
             <div class="verdict-title" id="verdictTitle">RECOMMENDED PICK: Pommel Strike</div>
-            <div class="verdict-sub" id="verdictSub">Score: 8.2 / 10 | Solves early draw and damage needs</div>
+            <div class="verdict-sub" id="verdictSub">Solves early draw and damage needs</div>
           </div>
         </div>
 
@@ -279,8 +324,52 @@
       <div class="compendium-grid" id="compendiumGrid">
         <!-- Populated dynamically -->
       </div>
-    </section>
   </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ Gemini AI Advisor Settings</h3>
+        <button id="btnCloseModal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Configure Google Gemini Flash to power deep, tactical STS2 card recommendations grounded in your live game state.</p>
+        
+        <div class="form-group">
+          <label for="inputApiKey">Gemini API Key</label>
+          <div class="input-with-action">
+            <input type="password" id="inputApiKey" class="slot-input" placeholder="Paste your AIza... API key">
+            <button id="btnToggleKeyVis" class="btn-sm btn-secondary" type="button">Show</button>
+          </div>
+          <span class="form-hint" id="keyStatusHint">Stored locally in <code>data/companion_config.json</code> or via <code>GEMINI_API_KEY</code> env.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="selectModel">Gemini Model</label>
+          <select id="selectModel" class="filter-select">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Ultra Fast)</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Reasoning)</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkSearchGrounding" checked>
+            <span>Enable Google Search Grounding (Restricted strictly to STS2)</span>
+          </label>
+        </div>
+
+        <div id="settingsFeedback" class="settings-feedback hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveSettings" class="btn-primary">Save Settings</button>
+        <button id="btnCancelSettings" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>

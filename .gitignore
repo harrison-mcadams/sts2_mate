@@ -7,3 +7,6 @@ env/
 venv/
 .idea/
 .vscode/
+data/companion_config.json
+*.env
+.env

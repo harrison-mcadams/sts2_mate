@@ -10,8 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
   setupAutocomplete();
   setupAdvisorActions();
+  setupSettingsModal();
   setupSyncButton();
   loadInitialData();
+  checkApiKeyStatus();
   fetchState(); // Immediate fetch on page load
   startLiveStream();
   setInterval(fetchState, 2500); // 2.5s heartbeat poll
@@ -335,8 +337,18 @@ function setupAdvisorActions() {
   const btnClear = document.getElementById("btnClearSlots");
   const btnLoadPending = document.getElementById("btnLoadPending");
   const btnScreenGrab = document.getElementById("btnScreenGrab");
+  const btnAskAI = document.getElementById("btnAskAI");
+  const btnOpenKeyModal = document.getElementById("btnOpenKeyModal");
 
   btnEvaluate.addEventListener("click", runEvaluation);
+
+  if (btnAskAI) {
+    btnAskAI.addEventListener("click", runAIEvaluation);
+  }
+
+  if (btnOpenKeyModal) {
+    btnOpenKeyModal.addEventListener("click", openSettingsModal);
+  }
 
   if (btnScreenGrab) {
     btnScreenGrab.addEventListener("click", runScreenGrab);
@@ -355,6 +367,8 @@ function setupAdvisorActions() {
       document.getElementById(`slot${n}`).value = "";
     });
     document.getElementById("adviceResultsArea").classList.add("hidden");
+    const aiCard = document.getElementById("aiAdvisorCard");
+    if (aiCard) aiCard.classList.add("hidden");
     const notice = document.getElementById("grabStatusNotice");
     if (notice) notice.classList.add("hidden");
   });
@@ -369,6 +383,18 @@ function setupAdvisorActions() {
       runEvaluation();
     }
   });
+}
+
+let isApiKeyConfigured = false;
+
+async function checkApiKeyStatus() {
+  try {
+    const res = await fetch("/api/config");
+    const data = await res.json();
+    isApiKeyConfigured = !!data.gemini_api_key_configured;
+  } catch (e) {
+    console.warn("Failed checking API key status:", e);
+  }
 }
 
 async function runScreenGrab() {
@@ -422,6 +448,10 @@ async function runScreenGrab() {
       runEvaluation();
     }
 
+    if (data.ai_evaluation) {
+      renderAIAdvice(data.ai_evaluation);
+    }
+
     if (notice) {
       notice.className = "grab-notice success";
       const names = cards.map(c => c.name).join(", ");
@@ -435,7 +465,7 @@ async function runScreenGrab() {
     }
   } finally {
     btn.classList.remove("loading");
-    btn.innerHTML = `<span>📸</span> Grab from Screen (PC)`;
+    btn.innerHTML = `<span>📸</span> Grab Screen (PC)`;
   }
 }
 
@@ -459,9 +489,235 @@ async function runEvaluation() {
     });
     const data = await res.json();
     renderAdviceResults(data);
+
+    // If key configured, run AI evaluation automatically
+    if (isApiKeyConfigured) {
+      runAIEvaluation();
+    }
   } catch (err) {
     console.error("Evaluation failed:", err);
     alert("Failed to evaluate card choices.");
+  }
+}
+
+async function runAIEvaluation() {
+  const cards = [];
+  [1, 2, 3, 4].forEach(n => {
+    const val = document.getElementById(`slot${n}`).value.trim();
+    if (val) cards.push(val);
+  });
+
+  if (cards.length === 0) {
+    alert("Please enter at least one card name to evaluate.");
+    return;
+  }
+
+  const btnAskAI = document.getElementById("btnAskAI");
+  const aiCard = document.getElementById("aiAdvisorCard");
+  const keyNotice = document.getElementById("aiKeyNotice");
+  const resultsArea = document.getElementById("adviceResultsArea");
+
+  resultsArea.classList.remove("hidden");
+
+  if (btnAskAI) {
+    btnAskAI.classList.add("loading");
+    btnAskAI.innerHTML = `<span>⏳</span> Consulting Gemini 3.8 Flash...`;
+  }
+
+  try {
+    const res = await fetch("/api/ai_evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cards }),
+    });
+    const data = await res.json();
+
+    if (!data.success && data.requires_api_key) {
+      if (keyNotice) keyNotice.classList.remove("hidden");
+      if (aiCard) aiCard.classList.add("hidden");
+      return;
+    }
+
+    if (data.fallback_evaluation) {
+      renderAdviceResults(data.fallback_evaluation);
+    }
+
+    renderAIAdvice(data);
+  } catch (err) {
+    console.error("AI Evaluation error:", err);
+  } finally {
+    if (btnAskAI) {
+      btnAskAI.classList.remove("loading");
+      btnAskAI.innerHTML = `<span>🧠</span> Ask Gemini AI`;
+    }
+  }
+}
+
+function renderAIAdvice(data) {
+  const aiCard = document.getElementById("aiAdvisorCard");
+  const keyNotice = document.getElementById("aiKeyNotice");
+  if (!aiCard) return;
+
+  if (!data || !data.success || !data.recommendation) {
+    if (data && data.requires_api_key && keyNotice) {
+      keyNotice.classList.remove("hidden");
+      aiCard.classList.add("hidden");
+    }
+    return;
+  }
+
+  if (keyNotice) keyNotice.classList.add("hidden");
+  aiCard.classList.remove("hidden");
+
+  const rec = data.recommendation;
+  const modelBadge = document.getElementById("aiModelBadge");
+  if (modelBadge) modelBadge.textContent = data.model || "Gemini Flash";
+
+  const headline = document.getElementById("aiVerdictHeadline");
+  if (headline) headline.textContent = rec.verdict || `Recommended: ${rec.recommended_card}`;
+
+  const reasoning = document.getElementById("aiReasoning");
+  if (reasoning) reasoning.textContent = rec.tactical_reasoning || "";
+
+  const threatPrep = document.getElementById("aiThreatPrep");
+  if (threatPrep) threatPrep.textContent = rec.upcoming_threat_prep || "General deck balance preparation.";
+
+  const synergiesUl = document.getElementById("aiSynergies");
+  if (synergiesUl) {
+    synergiesUl.innerHTML = "";
+    const syns = rec.deck_synergies || [];
+    if (syns.length === 0) {
+      synergiesUl.innerHTML = "<li>No direct synergistic dependencies. Good standalone addition.</li>";
+    } else {
+      syns.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        synergiesUl.appendChild(li);
+      });
+    }
+  }
+}
+
+// Settings Modal Controller
+function setupSettingsModal() {
+  const btnSettings = document.getElementById("btnSettings");
+  const modal = document.getElementById("settingsModal");
+  const btnClose = document.getElementById("btnCloseModal");
+  const btnCancel = document.getElementById("btnCancelSettings");
+  const btnSave = document.getElementById("btnSaveSettings");
+  const btnToggleVis = document.getElementById("btnToggleKeyVis");
+  const inputKey = document.getElementById("inputApiKey");
+
+  if (btnSettings) btnSettings.addEventListener("click", openSettingsModal);
+  if (btnClose) btnClose.addEventListener("click", closeSettingsModal);
+  if (btnCancel) btnCancel.addEventListener("click", closeSettingsModal);
+  if (btnSave) btnSave.addEventListener("click", saveSettings);
+
+  if (btnToggleVis && inputKey) {
+    btnToggleVis.addEventListener("click", () => {
+      if (inputKey.type === "password") {
+        inputKey.type = "text";
+        btnToggleVis.textContent = "Hide";
+      } else {
+        inputKey.type = "password";
+        btnToggleVis.textContent = "Show";
+      }
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeSettingsModal();
+    });
+  }
+}
+
+async function openSettingsModal() {
+  const modal = document.getElementById("settingsModal");
+  const feedback = document.getElementById("settingsFeedback");
+  if (feedback) feedback.className = "settings-feedback hidden";
+
+  try {
+    const res = await fetch("/api/config");
+    const data = await res.json();
+
+    const inputKey = document.getElementById("inputApiKey");
+    const keyHint = document.getElementById("keyStatusHint");
+    const selectModel = document.getElementById("selectModel");
+    const chkSearch = document.getElementById("chkSearchGrounding");
+
+    if (data.gemini_api_key_configured) {
+      if (keyHint) keyHint.innerHTML = `✅ Key configured (${escapeHtml(data.masked_key)}). Enter new key to replace.`;
+      if (inputKey) inputKey.placeholder = `Configured (${data.masked_key})`;
+    } else {
+      if (keyHint) keyHint.innerHTML = `⚠️ No key configured. Paste your Google Gemini API key below.`;
+      if (inputKey) inputKey.placeholder = "AIza...";
+    }
+
+    if (selectModel && data.gemini_model) selectModel.value = data.gemini_model;
+    if (chkSearch) chkSearch.checked = data.enable_search_grounding !== false;
+
+  } catch (err) {
+    console.error("Error loading config:", err);
+  }
+
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeSettingsModal() {
+  const modal = document.getElementById("settingsModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function saveSettings() {
+  const inputKey = document.getElementById("inputApiKey");
+  const selectModel = document.getElementById("selectModel");
+  const chkSearch = document.getElementById("chkSearchGrounding");
+  const feedback = document.getElementById("settingsFeedback");
+
+  const updates = {};
+  if (inputKey && inputKey.value.trim()) {
+    updates.gemini_api_key = inputKey.value.trim();
+  }
+  if (selectModel) {
+    updates.gemini_model = selectModel.value;
+  }
+  if (chkSearch) {
+    updates.enable_search_grounding = chkSearch.checked;
+  }
+
+  try {
+    const res = await fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      isApiKeyConfigured = !!data.config.gemini_api_key_configured;
+      if (feedback) {
+        feedback.className = "settings-feedback success";
+        feedback.textContent = "✅ Settings saved successfully!";
+        feedback.classList.remove("hidden");
+      }
+      setTimeout(() => {
+        closeSettingsModal();
+        if (inputKey) inputKey.value = "";
+      }, 1000);
+    } else {
+      if (feedback) {
+        feedback.className = "settings-feedback error";
+        feedback.textContent = `❌ ${data.error || "Failed to save settings."}`;
+        feedback.classList.remove("hidden");
+      }
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.className = "settings-feedback error";
+      feedback.textContent = `❌ Network error saving settings: ${err.message}`;
+      feedback.classList.remove("hidden");
+    }
   }
 }
 

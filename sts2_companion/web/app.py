@@ -14,7 +14,9 @@ from ..core.miner import STS2HistoryMiner
 from ..core.save_parser import STS2SaveParser
 from ..core.watcher import STS2LiveWatcher
 from ..advisor.evaluator import STS2CardRewardAdvisor
+from ..advisor.ai_advisor import GeminiSTS2Advisor
 from ..core.paths import get_default_save_dir
+from ..core.config import get_gemini_api_key, get_gemini_model, load_config, save_config
 
 
 def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
@@ -25,8 +27,10 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
 
     parser = STS2SaveParser(data_dir=data_dir)
     miner = STS2HistoryMiner(history_dir=history_dir, data_dir=data_dir) if history_dir else STS2HistoryMiner(data_dir=data_dir)
+    mined_stats = miner.mine_all()
     watcher = STS2LiveWatcher(profile_dir=effective_save, data_dir=data_dir) if effective_save else STS2LiveWatcher(data_dir=data_dir)
-    advisor = STS2CardRewardAdvisor(parser.cards_db, miner.mine_all())
+    advisor = STS2CardRewardAdvisor(parser.cards_db, mined_stats)
+    ai_advisor = GeminiSTS2Advisor(parser.cards_db, parser.relics_db, mined_stats)
 
     # Event queue for SSE updates
     event_queues: List[queue.Queue] = []
@@ -128,6 +132,62 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         result = advisor.evaluate_reward(resolved_ids, current_run)
         return jsonify(result)
 
+    @app.route("/api/ai_evaluate", methods=["POST"])
+    def ai_evaluate_reward():
+        data = request.get_json() or {}
+        card_ids_or_names = data.get("cards") or data.get("card_ids") or []
+        resolved_ids = []
+        for item in card_ids_or_names:
+            item_str = str(item).strip()
+            if item_str.startswith("CARD.") and item_str in parser.cards_db:
+                resolved_ids.append(item_str)
+            else:
+                matched = False
+                for cid, cinfo in parser.cards_db.items():
+                    if cinfo.get("name", "").lower() == item_str.lower():
+                        resolved_ids.append(cid)
+                        matched = True
+                        break
+                if not matched:
+                    resolved_ids.append(f"CARD.{item_str.upper().replace(' ', '_')}")
+
+        current_run = watcher.get_state()
+        result = ai_advisor.evaluate(resolved_ids, current_run, fallback_advisor=advisor)
+        return jsonify(result)
+
+    @app.route("/api/config", methods=["GET", "POST"])
+    def handle_config():
+        if request.method == "POST":
+            data = request.get_json() or {}
+            updates = {}
+            if "gemini_api_key" in data:
+                updates["gemini_api_key"] = str(data["gemini_api_key"]).strip()
+            if "gemini_model" in data:
+                updates["gemini_model"] = str(data["gemini_model"]).strip()
+            if "enable_search_grounding" in data:
+                updates["enable_search_grounding"] = bool(data["enable_search_grounding"])
+            saved = save_config(updates)
+            has_key = bool(get_gemini_api_key())
+            return jsonify({
+                "success": True,
+                "config": {
+                    "gemini_api_key_configured": has_key,
+                    "gemini_model": get_gemini_model(),
+                    "enable_search_grounding": saved.get("enable_search_grounding", True)
+                }
+            })
+        else:
+            cfg = load_config()
+            has_key = bool(get_gemini_api_key())
+            raw_key = cfg.get("gemini_api_key", "")
+            masked = (raw_key[:4] + "..." + raw_key[-4:]) if len(raw_key) > 8 else ("configured" if has_key else "")
+            return jsonify({
+                "gemini_api_key_configured": has_key,
+                "masked_key": masked,
+                "gemini_model": get_gemini_model(),
+                "enable_search_grounding": cfg.get("enable_search_grounding", True)
+            })
+
     @app.route("/api/screen_grab", methods=["POST"])
     def screen_grab_cards():
         try:
@@ -145,6 +205,7 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
             card_names = [c["name"] for c in detected_cards]
 
             evaluation = None
+            ai_evaluation = None
             if card_names:
                 resolved_ids = []
                 for item in card_names:
@@ -159,13 +220,17 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
                         resolved_ids.append(f"CARD.{item_str.upper().replace(' ', '_')}")
 
                 evaluation = advisor.evaluate_reward(resolved_ids, current_run)
+                # Automatically run AI evaluation if key is available
+                if get_gemini_api_key():
+                    ai_evaluation = ai_advisor.evaluate(resolved_ids, current_run, fallback_advisor=advisor)
 
             return jsonify({
                 "success": True,
                 "source": result.get("source"),
                 "cards": detected_cards,
                 "card_names": card_names,
-                "evaluation": evaluation
+                "evaluation": evaluation,
+                "ai_evaluation": ai_evaluation
             })
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
@@ -177,6 +242,8 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
             res = extractor.extract_all(output_dir=data_dir)
             parser._load_databases()
             advisor.cards_db = parser.cards_db
+            ai_advisor.cards_db = parser.cards_db
+            ai_advisor.relics_db = parser.relics_db
             return jsonify({"success": True, "extracted": res})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
