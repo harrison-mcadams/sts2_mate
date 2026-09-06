@@ -43,7 +43,29 @@ class STS2LiveWatcher:
 
     def get_state(self) -> Dict[str, Any]:
         with self._lock:
-            return dict(self.latest_state)
+            if self.latest_state:
+                return dict(self.latest_state)
+            return {
+                "is_active": False,
+                "waiting_for_game": True,
+                "character": "Ironclad",
+                "ascension": 0,
+                "current_floor": 0,
+                "current_act": 1,
+                "current_hp": 80,
+                "max_hp": 80,
+                "hp_percent": 100.0,
+                "gold": 99,
+                "deck": [],
+                "deck_size": 0,
+                "deck_breakdown": {},
+                "relics": [],
+                "relic_count": 0,
+                "potions": [],
+                "card_reward_history": [],
+                "recent_rooms": [],
+                "monitored_path": self.profile_dir,
+            }
 
     def start(self) -> None:
         if self.is_running:

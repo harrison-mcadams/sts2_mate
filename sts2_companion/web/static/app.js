@@ -12,7 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAdvisorActions();
   setupSyncButton();
   loadInitialData();
+  fetchState(); // Immediate fetch on page load
   startLiveStream();
+  setInterval(fetchState, 2500); // 2.5s heartbeat poll
 });
 
 // Tab Navigation
@@ -51,38 +53,42 @@ async function loadInitialData() {
   }
 }
 
-// Real-Time Live Stream (SSE)
-function startLiveStream() {
-  const evtSource = new EventSource("/api/events");
-
-  evtSource.onmessage = (event) => {
-    try {
-      const state = JSON.parse(event.data);
-      if (state && Object.keys(state).length > 0) {
-        updateHUD(state);
-        updateDeckAndRelics(state);
-      }
-    } catch (e) {
-      console.error("Error parsing live stream event:", e);
-    }
-  };
-
-  evtSource.onerror = () => {
-    console.warn("SSE connection lost, polling fallback active...");
-    pollFallback();
-  };
-}
-
-async function pollFallback() {
+// Immediate State Fetch
+async function fetchState() {
   try {
     const res = await fetch("/api/state");
     const state = await res.json();
-    if (state && Object.keys(state).length > 0) {
+    if (state) {
       updateHUD(state);
       updateDeckAndRelics(state);
     }
   } catch (e) {
-    console.error("Fallback poll error:", e);
+    console.warn("Poll state error:", e);
+  }
+}
+
+// Real-Time Live Stream (SSE)
+function startLiveStream() {
+  try {
+    const evtSource = new EventSource("/api/events");
+
+    evtSource.onmessage = (event) => {
+      try {
+        const state = JSON.parse(event.data);
+        if (state) {
+          updateHUD(state);
+          updateDeckAndRelics(state);
+        }
+      } catch (e) {
+        console.error("Error parsing live stream event:", e);
+      }
+    };
+
+    evtSource.onerror = () => {
+      // EventSource failed or reconnected; polling will handle it
+    };
+  } catch (e) {
+    console.warn("EventSource not supported; polling active.");
   }
 }
 
@@ -92,9 +98,14 @@ function updateHUD(state) {
   const statusBadge = document.getElementById("statusBadge");
   const statusText = document.getElementById("statusText");
 
+  if (!state) return;
+
   if (state.is_active) {
     statusBadge.className = "status-badge live";
     statusText.textContent = "LIVE RUN ACTIVE";
+  } else if (state.waiting_for_game) {
+    statusBadge.className = "status-badge idle";
+    statusText.textContent = "CONNECTED (WAITING FOR RUN)";
   } else {
     statusBadge.className = "status-badge idle";
     statusText.textContent = "IDLE (SHOWING LATEST RUN)";
@@ -104,9 +115,14 @@ function updateHUD(state) {
   const char = (state.character || "Ironclad").toLowerCase();
   document.body.className = `char-${char}`;
 
-  document.getElementById("valChar").textContent = state.character || "UNKNOWN";
+  document.getElementById("valChar").textContent = state.character || "IRONCLAD";
   document.getElementById("valAsc").textContent = `A${state.ascension || 0}`;
-  document.getElementById("valFloor").textContent = `Floor ${state.current_floor || 1} (Act ${state.current_act || 1})`;
+  
+  if (state.waiting_for_game && (!state.current_floor || state.current_floor === 0)) {
+    document.getElementById("valFloor").textContent = "Not in run";
+  } else {
+    document.getElementById("valFloor").textContent = `Floor ${state.current_floor || 1} (Act ${state.current_act || 1})`;
+  }
 
   const curHp = state.current_hp || 0;
   const maxHp = state.max_hp || 1;
