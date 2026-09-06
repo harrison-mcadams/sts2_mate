@@ -21,6 +21,11 @@ cd "$SCRIPT_DIR"
 # Auto-update from git repository if connected
 git pull origin main --quiet 2>/dev/null || true
 
+# Auto-create Desktop icon if not already present
+if [ ! -f "$HOME/Desktop/STS2 Companion.desktop" ]; then
+    bash "$SCRIPT_DIR/create_desktop_shortcut.sh" > /dev/null 2>&1 || true
+fi
+
 echo "[*] Launching Companion Server on local network..."
 echo "[*] (Zero dependencies required - running with pure Python standard library)"
 echo ""
