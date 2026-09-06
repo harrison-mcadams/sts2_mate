@@ -144,7 +144,12 @@ class STS2LiveWatcher:
                         with self._lock:
                             self.latest_state = parsed
                         changed = True
-                        print(f"\n[+] >>> LIVE RUN ACTIVE! Floor {parsed.get('current_floor', 1)} | HP: {parsed.get('current_hp')}/{parsed.get('max_hp')} | {parsed.get('character', 'Hero')} <<<", flush=True)
+                        reward_opts = parsed.get("pending_reward") or []
+                        if reward_opts:
+                            card_names = [c.get("name", c.get("id")) for c in reward_opts]
+                            print(f"\n[+] 🎁 LIVE CARD REWARD OFFERED: {' | '.join(card_names)}", flush=True)
+                        else:
+                            print(f"\n[+] >>> LIVE RUN ACTIVE! Floor {parsed.get('current_floor', 1)} | HP: {parsed.get('current_hp')}/{parsed.get('max_hp')} | {parsed.get('character', 'Hero')} <<<", flush=True)
             except Exception as e:
                 print(f"Error reading active run: {e}", flush=True)
         else:

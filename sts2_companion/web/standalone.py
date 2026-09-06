@@ -92,6 +92,17 @@ class STS2RequestHandler(BaseHTTPRequestHandler):
                 self._send_json(stats)
             elif path == "/api/events":
                 self._handle_sse_stream()
+            elif path == "/api/raw_save":
+                active_save = self.watcher.current_save_path
+                if os.path.exists(active_save):
+                    try:
+                        with open(active_save, "r", encoding="utf-8") as f:
+                            raw = json.load(f)
+                        self._send_json({"found": True, "path": active_save, "save": raw})
+                    except Exception as e:
+                        self._send_json({"found": True, "error": str(e)})
+                else:
+                    self._send_json({"found": False, "path": active_save})
             else:
                 self.send_error(404, "Not Found")
         except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):

@@ -178,13 +178,13 @@ class STS2SaveParser:
             # 1. From latest room in map_history
             if all_card_choices:
                 latest = all_card_choices[-1]
-                if not latest.get("picked"):
+                if not latest.get("picked") and latest.get("options"):
                     latest_unpicked_reward = latest.get("options", [])
 
             # 2. Check top-level or player-level reward structures if not found in map_history
             if not latest_unpicked_reward:
                 for container in [raw_data, player_raw]:
-                    for rkey in ["rewards", "pending_rewards", "combat_rewards", "card_rewards", "active_rewards"]:
+                    for rkey in ["rewards", "pending_rewards", "combat_rewards", "card_rewards", "active_rewards", "current_rewards"]:
                         rval = container.get(rkey)
                         if isinstance(rval, list):
                             for r_item in rval:
@@ -201,6 +201,10 @@ class STS2SaveParser:
                                             break
                         if latest_unpicked_reward:
                             break
+
+            # 3. Deep recursive search for any offered card group in active run
+            if not latest_unpicked_reward:
+                latest_unpicked_reward = self.find_pending_card_reward(raw_data)
 
         return {
             "is_active": is_active,
@@ -230,6 +234,53 @@ class STS2SaveParser:
             "pending_reward": latest_unpicked_reward,
             "recent_rooms": recent_rooms[-8:] if recent_rooms else [],
         }
+
+    def find_pending_card_reward(self, raw_data: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+        """
+        Recursively discovers unpicked card reward offers from anywhere in the save file.
+        Detects any list of 2 to 5 card choices with CARD.* IDs.
+        """
+        found_offers = []
+
+        def walk(node, depth=0):
+            if depth > 12:
+                return
+            if isinstance(node, list):
+                card_items = []
+                has_picked = False
+                for item in node:
+                    cid = None
+                    if isinstance(item, str) and item.startswith("CARD."):
+                        cid = item
+                    elif isinstance(item, dict):
+                        if item.get("was_picked"):
+                            has_picked = True
+                        if "id" in item and str(item["id"]).startswith("CARD."):
+                            cid = str(item["id"])
+                        elif "card" in item and isinstance(item["card"], dict):
+                            c_sub = item["card"]
+                            if "id" in c_sub and str(c_sub["id"]).startswith("CARD."):
+                                cid = str(c_sub["id"])
+                    if cid:
+                        card_items.append(cid)
+
+                # Standard card rewards offer 2 to 5 cards
+                if 2 <= len(card_items) <= 5 and not has_picked:
+                    found_offers.append(card_items)
+
+                for child in node:
+                    walk(child, depth + 1)
+            elif isinstance(node, dict):
+                for v in node.values():
+                    walk(v, depth + 1)
+
+        walk(raw_data)
+
+        if found_offers:
+            latest_offer = found_offers[-1]
+            return [self.get_card_info(cid) for cid in latest_offer]
+
+        return None
 
     def parse_file(self, file_path: str, is_active: bool = False) -> Optional[Dict[str, Any]]:
         """Reads and parses a save or run file from disk."""
