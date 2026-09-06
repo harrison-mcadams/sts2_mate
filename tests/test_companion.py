@@ -143,8 +143,8 @@ class TestSTS2Companion(unittest.TestCase):
         initial_cfg = load_config()
         self.assertIn("gemini_model", initial_cfg)
 
-        save_config({"gemini_model": "gemini-2.5-flash", "enable_search_grounding": True})
-        self.assertEqual(get_gemini_model(), "gemini-2.5-flash")
+        save_config({"gemini_model": "gemini-3.8-flash", "enable_search_grounding": True})
+        self.assertEqual(get_gemini_model(), "gemini-3.8-flash")
 
     def test_gemini_prompt_builder_and_guardrails(self):
         """Verify Gemini prompt contains authoritative STS2 ground-truth and anti-STS1 directives."""
@@ -192,9 +192,9 @@ class TestSTS2Companion(unittest.TestCase):
         self.assertIn("gemini_model", data)
 
         # POST /api/config
-        post_res = self.client.post("/api/config", json={"gemini_model": "gemini-2.5-flash"})
+        post_res = self.client.post("/api/config", json={"gemini_model": "gemini-3.8-flash"})
         self.assertEqual(post_res.status_code, 200)
-        self.assertEqual(post_res.get_json()["config"]["gemini_model"], "gemini-2.5-flash")
+        self.assertEqual(post_res.get_json()["config"]["gemini_model"], "gemini-3.8-flash")
 
         # POST /api/ai_evaluate without key returns requires_api_key: True and fallback
         ai_res = self.client.post("/api/ai_evaluate", json={"cards": ["Whirlwind", "Sword Boomerang", "Bludgeon"]})
