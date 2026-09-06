@@ -456,6 +456,56 @@ body {
   color: #fff;
 }
 
+.btn-grab {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+}
+
+.btn-grab:hover {
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.55);
+}
+
+.btn-grab.loading {
+  opacity: 0.65;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.grab-notice {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.grab-notice.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.grab-notice.warning {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.grab-notice.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* VERDICT BANNER */
 .verdict-banner {
   background: linear-gradient(90deg, #1b263b 0%, #151922 100%);

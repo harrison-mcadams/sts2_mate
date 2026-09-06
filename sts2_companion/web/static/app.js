@@ -266,9 +266,19 @@ function setupAutocomplete() {
         return;
       }
 
+      const currentChar = currentState && currentState.character ? currentState.character.toLowerCase() : "";
+
       const matches = allCards.filter(c =>
         c.name.toLowerCase().includes(val) || c.key.toLowerCase().includes(val)
-      ).slice(0, 10);
+      ).sort((a, b) => {
+        const aChar = (a.character || "").toLowerCase() === currentChar ? 0 : 1;
+        const bChar = (b.character || "").toLowerCase() === currentChar ? 0 : 1;
+        if (aChar !== bChar) return aChar - bChar;
+        const aStarts = a.name.toLowerCase().startsWith(val) ? 0 : 1;
+        const bStarts = b.name.toLowerCase().startsWith(val) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return a.name.localeCompare(b.name);
+      }).slice(0, 10);
 
       dropdown.innerHTML = "";
       if (matches.length === 0) {
@@ -286,6 +296,15 @@ function setupAutocomplete() {
         item.addEventListener("click", () => {
           input.value = c.name;
           dropdown.style.display = "none";
+
+          // Auto-advance to next empty slot
+          if (num < 3) {
+            const nextInput = document.getElementById(`slot${num + 1}`);
+            if (nextInput && !nextInput.value) {
+              nextInput.focus();
+            }
+          }
+          checkAutoEvaluate();
         });
         dropdown.appendChild(item);
       });
@@ -301,19 +320,43 @@ function setupAutocomplete() {
   });
 }
 
+function checkAutoEvaluate() {
+  const s1 = document.getElementById("slot1").value.trim();
+  const s2 = document.getElementById("slot2").value.trim();
+  const s3 = document.getElementById("slot3").value.trim();
+  if (s1 && s2 && s3) {
+    runEvaluation();
+  }
+}
+
 // Advisor Actions
 function setupAdvisorActions() {
   const btnEvaluate = document.getElementById("btnEvaluate");
   const btnClear = document.getElementById("btnClearSlots");
   const btnLoadPending = document.getElementById("btnLoadPending");
+  const btnScreenGrab = document.getElementById("btnScreenGrab");
 
   btnEvaluate.addEventListener("click", runEvaluation);
+
+  if (btnScreenGrab) {
+    btnScreenGrab.addEventListener("click", runScreenGrab);
+  }
+
+  // Hotkey: Press 'G' to grab screen
+  document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() === "g" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      if (btnScreenGrab) btnScreenGrab.click();
+    }
+  });
 
   btnClear.addEventListener("click", () => {
     [1, 2, 3, 4].forEach(n => {
       document.getElementById(`slot${n}`).value = "";
     });
     document.getElementById("adviceResultsArea").classList.add("hidden");
+    const notice = document.getElementById("grabStatusNotice");
+    if (notice) notice.classList.add("hidden");
   });
 
   btnLoadPending.addEventListener("click", () => {
@@ -326,6 +369,74 @@ function setupAdvisorActions() {
       runEvaluation();
     }
   });
+}
+
+async function runScreenGrab() {
+  const btn = document.getElementById("btnScreenGrab");
+  const notice = document.getElementById("grabStatusNotice");
+  if (!btn) return;
+
+  btn.classList.add("loading");
+  btn.innerHTML = `<span>⏳</span> Scanning Screen...`;
+  if (notice) {
+    notice.className = "grab-notice";
+    notice.innerText = "Capturing screen & running OCR...";
+    notice.classList.remove("hidden");
+  }
+
+  try {
+    const res = await fetch("/api/screen_grab", { method: "POST" });
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      if (notice) {
+        notice.className = "grab-notice error";
+        notice.innerText = `❌ ${data.error || "Screen grab failed. Ensure game is running on PC."}`;
+      }
+      return;
+    }
+
+    const cards = data.cards || [];
+    if (cards.length === 0) {
+      if (notice) {
+        notice.className = "grab-notice warning";
+        notice.innerText = `⚠️ No card rewards detected on screen. Make sure the 3-card reward screen is open in STS2!`;
+      }
+      return;
+    }
+
+    // Populate slots
+    [1, 2, 3, 4].forEach(n => {
+      document.getElementById(`slot${n}`).value = "";
+    });
+
+    cards.forEach((c, idx) => {
+      if (idx < 4) {
+        document.getElementById(`slot${idx + 1}`).value = c.name;
+      }
+    });
+
+    if (data.evaluation) {
+      renderAdviceResults(data.evaluation);
+    } else {
+      runEvaluation();
+    }
+
+    if (notice) {
+      notice.className = "grab-notice success";
+      const names = cards.map(c => c.name).join(", ");
+      notice.innerText = `✅ Detected ${cards.length} cards: ${names}! Evaluated instantly.`;
+    }
+  } catch (err) {
+    console.error("Screen grab request failed:", err);
+    if (notice) {
+      notice.className = "grab-notice error";
+      notice.innerText = `❌ Error communicating with screen grab service: ${err.message}`;
+    }
+  } finally {
+    btn.classList.remove("loading");
+    btn.innerHTML = `<span>📸</span> Grab from Screen (PC)`;
+  }
 }
 
 async function runEvaluation() {

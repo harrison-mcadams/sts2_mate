@@ -1,1 +1,6 @@
 flask>=3.0.0
+mss>=10.0.0
+pillow>=10.0.0
+winocr>=0.0.15; sys_platform == 'win32'
+pywin32>=306; sys_platform == 'win32'
+

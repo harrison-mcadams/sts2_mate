@@ -128,6 +128,48 @@ def create_app(data_dir: str = "data", save_dir: Optional[str] = None) -> Flask:
         result = advisor.evaluate_reward(resolved_ids, current_run)
         return jsonify(result)
 
+    @app.route("/api/screen_grab", methods=["POST"])
+    def screen_grab_cards():
+        try:
+            from sts2_companion.core.screen_reader import get_screen_reader
+            sr = get_screen_reader()
+
+            current_run = watcher.get_state()
+            char_hint = current_run.get("character") if current_run else None
+
+            result = sr.grab_and_detect(character_hint=char_hint)
+            if not result.get("success"):
+                return jsonify(result), 400
+
+            detected_cards = result.get("cards", [])
+            card_names = [c["name"] for c in detected_cards]
+
+            evaluation = None
+            if card_names:
+                resolved_ids = []
+                for item in card_names:
+                    item_str = str(item).strip()
+                    matched = False
+                    for cid, cinfo in parser.cards_db.items():
+                        if cinfo.get("name", "").lower() == item_str.lower():
+                            resolved_ids.append(cid)
+                            matched = True
+                            break
+                    if not matched:
+                        resolved_ids.append(f"CARD.{item_str.upper().replace(' ', '_')}")
+
+                evaluation = advisor.evaluate_reward(resolved_ids, current_run)
+
+            return jsonify({
+                "success": True,
+                "source": result.get("source"),
+                "cards": detected_cards,
+                "card_names": card_names,
+                "evaluation": evaluation
+            })
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
     @app.route("/api/sync", methods=["POST"])
     def resync_database():
         try:
