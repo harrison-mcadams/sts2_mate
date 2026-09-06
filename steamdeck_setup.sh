@@ -18,6 +18,9 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
+# Auto-update from git repository if connected
+git pull origin main --quiet 2>/dev/null || true
+
 echo "[*] Launching Companion Server on local network..."
 echo "[*] (Zero dependencies required - running with pure Python standard library)"
 echo ""

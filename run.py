@@ -7,6 +7,7 @@ import os
 import socket
 import sys
 import webbrowser
+from typing import Optional
 from sts2_companion.core.extractor import STS2Extractor
 from sts2_companion.core.miner import STS2HistoryMiner
 from sts2_companion.core.paths import get_default_game_dir, get_default_save_dir
@@ -32,6 +33,19 @@ def get_local_ip() -> str:
     finally:
         s.close()
     return ip
+
+
+def get_tailscale_ip() -> Optional[str]:
+    """Detects Tailscale IPv4 address if Tailscale is running."""
+    import subprocess
+    try:
+        out = subprocess.check_output(["tailscale", "ip", "-4"], timeout=0.8, stderr=subprocess.DEVNULL)
+        ip = out.decode("utf-8").strip()
+        if ip and ip.startswith("100."):
+            return ip
+    except Exception:
+        pass
+    return None
 
 
 def main():
@@ -90,12 +104,17 @@ def main():
     local_url = f"http://127.0.0.1:{args.port}"
     lan_url = f"http://{local_ip}:{args.port}"
 
-    print(f"\nCompanion HUD is active:")
-    print(f"   -> Local URL:   {local_url}")
+    ts_ip = get_tailscale_ip()
+    ts_url = f"http://{ts_ip}:{args.port}" if ts_ip else None
+
+    print(f"\nCompanion HUD is active:", flush=True)
+    print(f"   -> Local URL:     {local_url}", flush=True)
     if args.host == "0.0.0.0":
-        print(f"   -> Network URL: {lan_url} (Open this on your phone/tablet!)")
-    print(f"   - Monitoring Saves: {effective_save_dir}")
-    print("   Press Ctrl+C to stop.\n" + "=" * 60 + "\n")
+        print(f"   -> Wi-Fi LAN URL: {lan_url} (Open this on your phone!)", flush=True)
+        if ts_url:
+            print(f"   -> Tailscale URL: {ts_url} (Use this if phone has Tailscale VPN!)", flush=True)
+    print(f"   - Monitoring Saves: {effective_save_dir}", flush=True)
+    print("   Press Ctrl+C to stop.\n" + "=" * 60 + "\n", flush=True)
 
     if not args.no_browser and args.host != "0.0.0.0":
         webbrowser.open(local_url)

@@ -28,7 +28,7 @@ class STS2LiveWatcher:
         self.latest_state: Dict[str, Any] = {}
         self.is_running = False
         self._thread: Optional[threading.Thread] = None
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._subscribers: List[Callable[[Dict[str, Any]], None]] = []
 
         self._last_active_mtime: float = 0.0
@@ -79,7 +79,7 @@ class STS2LiveWatcher:
         self.is_running = True
         self._thread = threading.Thread(target=self._watch_loop, daemon=True)
         self._thread.start()
-        print(f"STS2 Live Watcher started. Monitoring {self.profile_dir}")
+        print(f"STS2 Live Watcher started. Monitoring {self.profile_dir}", flush=True)
 
     def stop(self) -> None:
         self.is_running = False
@@ -89,38 +89,40 @@ class STS2LiveWatcher:
             try:
                 self.check_updates()
             except Exception as e:
-                print(f"Error checking STS2 save updates: {e}")
+                print(f"Error checking STS2 save updates: {e}", flush=True)
             time.sleep(self.poll_interval)
 
     def check_updates(self, force: bool = False) -> bool:
         """Checks if current_run.save or recent history files have changed."""
         now = time.time()
 
-        # Dynamic path re-discovery: if current path doesn't have an active save or profile, check if STS2 launched
-        has_active = os.path.exists(self.current_save_path)
-        has_profile = os.path.exists(os.path.join(self.profile_dir, "progress.save"))
+        # Check for current_run.save in monitored profile and any sibling profiles
+        active_save_file: Optional[str] = None
+        if os.path.exists(self.current_save_path):
+            active_save_file = self.current_save_path
+        else:
+            # Check sibling profiles (e.g. profile2, profile3)
+            parent_steam = os.path.dirname(os.path.normpath(self.profile_dir))
+            if os.path.exists(parent_steam):
+                for p_saves in glob.glob(os.path.join(parent_steam, "profile*", "saves")):
+                    cand = os.path.join(p_saves, "current_run.save")
+                    if os.path.exists(cand):
+                        active_save_file = cand
+                        self.profile_dir = p_saves
+                        self.current_save_path = cand
+                        self.history_dir = os.path.join(p_saves, "history")
+                        break
 
-        if not has_active and not has_profile and (now - self._last_path_scan_time > 3.0):
-            self._last_path_scan_time = now
-            new_dir = get_default_save_dir()
-            if new_dir and new_dir != self.profile_dir:
-                if os.path.exists(new_dir) and (os.path.exists(os.path.join(new_dir, "current_run.save")) or os.path.exists(os.path.join(new_dir, "progress.save"))):
-                    print(f"\n[+] Auto-detected Slay the Spire 2 active save path: {new_dir}")
-                    self.profile_dir = new_dir
-                    self.current_save_path = os.path.join(new_dir, "current_run.save")
-                    self.history_dir = os.path.join(new_dir, "history")
-                    has_active = os.path.exists(self.current_save_path)
-                    force = True
-
+        has_active = active_save_file is not None
         changed = False
 
-        if has_active:
+        if has_active and active_save_file:
             try:
-                mtime = os.path.getmtime(self.current_save_path)
+                mtime = os.path.getmtime(active_save_file)
                 if force or mtime > self._last_active_mtime:
-                    self._last_active_mtime = mtime
-                    parsed = self.parser.parse_file(self.current_save_path, is_active=True)
+                    parsed = self.parser.parse_file(active_save_file, is_active=True)
                     if parsed:
+                        self._last_active_mtime = mtime
                         parsed["game_status"] = "RUN_ACTIVE"
                         parsed["monitored_path"] = self.profile_dir
                         with self._lock:
