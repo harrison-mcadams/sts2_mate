@@ -101,17 +101,33 @@ class STS2LiveWatcher:
         if os.path.exists(self.current_save_path):
             active_save_file = self.current_save_path
         else:
-            # Check sibling profiles (e.g. profile2, profile3)
-            parent_steam = os.path.dirname(os.path.normpath(self.profile_dir))
-            if os.path.exists(parent_steam):
-                for p_saves in glob.glob(os.path.join(parent_steam, "profile*", "saves")):
-                    cand = os.path.join(p_saves, "current_run.save")
-                    if os.path.exists(cand):
-                        active_save_file = cand
-                        self.profile_dir = p_saves
-                        self.current_save_path = cand
-                        self.history_dir = os.path.join(p_saves, "history")
-                        break
+            # Check known Linux save paths directly
+            home = os.path.expanduser("~")
+            direct_candidates = [
+                os.path.join(home, ".local/share/SlayTheSpire2/steam/76561199820060807/profile1/saves/current_run.save"),
+                os.path.join(home, ".local/share/Steam/userdata/1859795079/2868840/remote/profile1/saves/current_run.save"),
+            ]
+            for cand in direct_candidates:
+                if os.path.exists(cand):
+                    active_save_file = cand
+                    p_saves = os.path.dirname(cand)
+                    self.profile_dir = p_saves
+                    self.current_save_path = cand
+                    self.history_dir = os.path.join(p_saves, "history")
+                    break
+
+            if not active_save_file:
+                # Check sibling profiles (e.g. profile2, profile3)
+                parent_steam = os.path.dirname(os.path.normpath(self.profile_dir))
+                if os.path.exists(parent_steam):
+                    for p_saves in glob.glob(os.path.join(parent_steam, "profile*", "saves")):
+                        cand = os.path.join(p_saves, "current_run.save")
+                        if os.path.exists(cand):
+                            active_save_file = cand
+                            self.profile_dir = p_saves
+                            self.current_save_path = cand
+                            self.history_dir = os.path.join(p_saves, "history")
+                            break
 
         has_active = active_save_file is not None
         changed = False

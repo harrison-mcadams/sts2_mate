@@ -132,27 +132,39 @@ def get_default_save_dir() -> Optional[str]:
                 return matches[0]
             return os.path.join(base, "profile1", "saves")
     else:
-        # Linux / Steam Deck Proton prefix for 2868840
+        home = os.path.expanduser("~")
+
+        # 1. Native Linux build: ~/.local/share/SlayTheSpire2/steam/<account_id>/profile1/saves
+        native_base = os.path.join(home, ".local/share/SlayTheSpire2/steam")
+        if os.path.exists(native_base):
+            matches = glob.glob(os.path.join(native_base, "*", "profile*", "saves"))
+            if matches:
+                for m in matches:
+                    if os.path.exists(os.path.join(m, "current_run.save")) or os.path.exists(os.path.join(m, "progress.save")):
+                        return m
+                return matches[0]
+
+        # 2. Steam Cloud Userdata: ~/.local/share/Steam/userdata/<account_id>/2868840/remote/profile1/saves
+        for ubase in [os.path.join(home, ".local/share/Steam/userdata"), os.path.join(home, ".steam/steam/userdata")]:
+            if os.path.exists(ubase):
+                matches = glob.glob(os.path.join(ubase, "*", STS2_STEAM_APPID, "remote", "profile*", "saves"))
+                if matches:
+                    for m in matches:
+                        if os.path.exists(os.path.join(m, "current_run.save")) or os.path.exists(os.path.join(m, "progress.save")):
+                            return m
+                    return matches[0]
+
+        # 3. Proton Wine prefix (if running Windows build through Proton)
         for lib in _get_linux_steam_libraries():
             sts2_compat = os.path.join(lib, f"steamapps/compatdata/{STS2_STEAM_APPID}/pfx/drive_c")
             if os.path.exists(sts2_compat):
                 resolved = _resolve_case_insensitive(
                     sts2_compat,
-                    ["users", "*", "appdata", "roaming", "slaythespire2", "steam", "*", "profile1", "saves"]
+                    ["users", "*", "appdata", "roaming", "slaythespire2", "steam", "*", "profile*", "saves"]
                 )
                 for r in resolved:
                     if os.path.exists(r):
                         return r
 
-        # Check native Linux directory as fallback
-        home = os.path.expanduser("~")
-        native_dir = os.path.join(home, ".config/SlayTheSpire2/profile1/saves")
-        if os.path.exists(native_dir):
-            return native_dir
-
-    # Fallback default
-    home = os.path.expanduser("~")
-    return os.path.join(
-        home,
-        f".local/share/Steam/steamapps/compatdata/{STS2_STEAM_APPID}/pfx/drive_c/users/steamuser/AppData/Roaming/SlayTheSpire2/steam/76561199820060807/profile1/saves"
-    )
+        # Fallback default: native path
+        return os.path.join(home, ".local/share/SlayTheSpire2/steam/76561199820060807/profile1/saves")
