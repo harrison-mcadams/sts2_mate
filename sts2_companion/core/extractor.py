@@ -109,6 +109,8 @@ class STS2Extractor:
             if "." not in key:
                 continue
             base_id, prop = key.split(".", 1)
+            if base_id.startswith("MOCK_"):
+                continue
             card_run_id = f"CARD.{base_id}"
 
             if card_run_id not in cards:

@@ -39,7 +39,10 @@ CARDS_DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(_
 COMMON_STOPWORDS = {
     "form", "strike", "blade", "slash", "wall", "wave", "soul", "shot",
     "blast", "card", "cards", "turn", "deal", "gain", "lose", "draw",
-    "skip", "choose", "reward", "select", "energy", "cost", "damage", "block"
+    "skip", "choose", "reward", "select", "energy", "cost", "damage", "block",
+    "attack", "skill", "power", "curse", "status", "mock", "common", "uncommon",
+    "rare", "basic", "special", "upgrade", "exhaust", "retain", "ethereal",
+    "unplayable", "innate", "target", "enemy", "enemies", "random", "times"
 }
 
 
@@ -62,8 +65,10 @@ class ScreenReader:
                 self.cards = json.load(f)
 
             for cid, cinfo in self.cards.items():
+                if cid.startswith("CARD.MOCK_") or "mock" in cid.lower():
+                    continue
                 name = cinfo.get("name", "").strip()
-                if not name:
+                if not name or "mock" in name.lower():
                     continue
 
                 norm = self._normalize(name)
@@ -106,6 +111,7 @@ class ScreenReader:
                     found_hwnd = hwnd
                 elif not found_hwnd and "slay the spire" in title.lower():
                     found_hwnd = hwnd
+            return True
 
         try:
             win32gui.EnumWindows(enum_cb, None)
@@ -227,7 +233,10 @@ class ScreenReader:
             if len(norm_line) < 3:
                 continue
 
-            if norm_line in {"skip", "chooseacard", "cardreward", "proceed", "combat", "floor", "select"}:
+            if norm_line in {
+                "skip", "chooseacard", "cardreward", "proceed", "combat", "floor", "select",
+                "attack", "skill", "power", "curse", "status", "choose", "reward"
+            }:
                 continue
 
             # 1. Exact match against normalized card names

@@ -242,10 +242,13 @@ class STS2SaveParser:
         """
         found_offers = []
 
-        def walk(node, depth=0):
+        def walk(node, depth=0, parent_key=None):
             if depth > 12:
                 return
             if isinstance(node, list):
+                # Never mistake removed cards, deck, or history structures for pending rewards
+                if parent_key in {"cards_removed", "deck", "cards_upgraded", "cards_transformed", "map_point_history"}:
+                    return
                 card_items = []
                 has_picked = False
                 for item in node:
@@ -269,10 +272,12 @@ class STS2SaveParser:
                     found_offers.append(card_items)
 
                 for child in node:
-                    walk(child, depth + 1)
+                    walk(child, depth + 1, parent_key)
             elif isinstance(node, dict):
-                for v in node.values():
-                    walk(v, depth + 1)
+                for k, v in node.items():
+                    if k in {"map_point_history", "deck", "cards_removed"}:
+                        continue
+                    walk(v, depth + 1, k)
 
         walk(raw_data)
 
