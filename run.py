@@ -10,7 +10,14 @@ import webbrowser
 from sts2_companion.core.extractor import STS2Extractor
 from sts2_companion.core.miner import STS2HistoryMiner
 from sts2_companion.core.paths import get_default_game_dir, get_default_save_dir
-from sts2_companion.web.app import create_app
+
+try:
+    from sts2_companion.web.app import create_app
+    HAS_FLASK = True
+except ImportError:
+    HAS_FLASK = False
+
+from sts2_companion.web.standalone import run_standalone_server
 
 
 def get_local_ip() -> str:
@@ -74,8 +81,6 @@ def main():
 
     # 3. Create Web Application
     print("[3/3] Starting Live Watcher and Companion Server...")
-    app = create_app(data_dir=data_dir, save_dir=effective_save_dir)
-
     local_ip = get_local_ip()
     local_url = f"http://127.0.0.1:{args.port}"
     lan_url = f"http://{local_ip}:{args.port}"
@@ -90,7 +95,12 @@ def main():
     if not args.no_browser and args.host != "0.0.0.0":
         webbrowser.open(local_url)
 
-    app.run(host=args.host, port=args.port, debug=False)
+    if HAS_FLASK:
+        app = create_app(data_dir=data_dir, save_dir=effective_save_dir)
+        app.run(host=args.host, port=args.port, debug=False)
+    else:
+        print("[*] Running with pure Python built-in server (zero external dependencies required).")
+        run_standalone_server(host=args.host, port=args.port, data_dir=data_dir, save_dir=effective_save_dir)
 
 
 if __name__ == "__main__":
