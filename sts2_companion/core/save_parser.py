@@ -172,12 +172,35 @@ class STS2SaveParser:
         current_floor = raw_data.get("floor_reached", total_floors)
         current_act_index = raw_data.get("current_act_index", len(map_history) - 1 if map_history else 0)
 
-        # Check if there is an unpicked card reward at the latest room
+        # Check if there is an unpicked card reward
         latest_unpicked_reward = None
-        if all_card_choices:
-            latest = all_card_choices[-1]
-            if is_active and not latest.get("picked"):
-                latest_unpicked_reward = latest.get("options", [])
+        if is_active:
+            # 1. From latest room in map_history
+            if all_card_choices:
+                latest = all_card_choices[-1]
+                if not latest.get("picked"):
+                    latest_unpicked_reward = latest.get("options", [])
+
+            # 2. Check top-level or player-level reward structures if not found in map_history
+            if not latest_unpicked_reward:
+                for container in [raw_data, player_raw]:
+                    for rkey in ["rewards", "pending_rewards", "combat_rewards", "card_rewards", "active_rewards"]:
+                        rval = container.get(rkey)
+                        if isinstance(rval, list):
+                            for r_item in rval:
+                                if isinstance(r_item, dict):
+                                    cards_opt = r_item.get("cards") or r_item.get("options")
+                                    if isinstance(cards_opt, list) and cards_opt:
+                                        parsed_opts = []
+                                        for c in cards_opt:
+                                            cid = c.get("id") if isinstance(c, dict) else str(c)
+                                            if cid:
+                                                parsed_opts.append(self.get_card_info(cid))
+                                        if parsed_opts:
+                                            latest_unpicked_reward = parsed_opts
+                                            break
+                        if latest_unpicked_reward:
+                            break
 
         return {
             "is_active": is_active,

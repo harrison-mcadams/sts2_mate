@@ -138,12 +138,53 @@ function updateHUD(state) {
   document.getElementById("valDeckSize").textContent = `${deckSize} Cards`;
   document.getElementById("deckTabCount").textContent = deckSize;
 
-  // Check pending card reward
+  // Auto-recognize and evaluate pending card rewards
+  handleAutoRewardEvaluation(state);
+}
+
+let lastAutoEvaluatedKey = "";
+
+function handleAutoRewardEvaluation(state) {
   const notice = document.getElementById("pendingRewardNotice");
-  if (state.is_active && state.pending_reward && state.pending_reward.length > 0) {
+  if (!state || !state.is_active || !state.pending_reward || state.pending_reward.length === 0) {
+    if (notice) notice.classList.add("hidden");
+    return;
+  }
+
+  const rewardCards = state.pending_reward;
+  const rewardKey = rewardCards.map(c => c.id || c.name).sort().join("|");
+
+  if (notice) {
     notice.classList.remove("hidden");
-  } else {
-    notice.classList.add("hidden");
+    const cardNames = rewardCards.map(c => c.name || c.id).join(" • ");
+    const span = notice.querySelector("span");
+    if (span) span.innerHTML = `🎁 <strong>Live Reward Offered:</strong> ${escapeHtml(cardNames)}`;
+  }
+
+  // If this reward set has not been evaluated yet, auto-evaluate!
+  if (rewardKey !== lastAutoEvaluatedKey) {
+    lastAutoEvaluatedKey = rewardKey;
+
+    [1, 2, 3, 4].forEach(n => {
+      const input = document.getElementById(`slot${n}`);
+      if (input) input.value = "";
+    });
+
+    rewardCards.forEach((c, idx) => {
+      if (idx < 4) {
+        const input = document.getElementById(`slot${idx + 1}`);
+        if (input) input.value = c.name || c.id;
+      }
+    });
+
+    // Auto-switch to Advisor tab so the player sees it immediately
+    const advisorTab = document.querySelector('.nav-tab[data-tab="tabAdvisor"]');
+    if (advisorTab && !advisorTab.classList.contains("active")) {
+      advisorTab.click();
+    }
+
+    // Automatically trigger evaluation
+    runEvaluation();
   }
 }
 
