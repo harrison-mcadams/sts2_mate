@@ -495,13 +495,54 @@ function renderAdviceResults(data) {
     const cardEl = document.createElement("div");
     cardEl.className = `ranked-card ${idx === 0 && !data.should_skip ? "top-choice" : ""}`;
 
-    const prosHtml = opt.pros.map(p => `<div class="pro-item"><span>+</span><span>${escapeHtml(p)}</span></div>`).join("");
-    const consHtml = opt.cons.map(c => `<div class="con-item"><span>-</span><span>${escapeHtml(c)}</span></div>`).join("");
+    // Map tactical fit to badge class
+    let fitClass = "addition";
+    if (opt.tactical_fit === "Fills Critical Gap") fitClass = "critical";
+    else if (opt.tactical_fit === "Strong Synergy") fitClass = "synergy";
+    else if (opt.tactical_fit === "Redundant Role") fitClass = "redundant";
+    else if (opt.tactical_fit === "Dilution Risk") fitClass = "dilution";
+
+    // Role audit box
+    const audit = opt.role_audit || {};
+    const auditCountClass = audit.is_critical ? "role-audit-count critical" : "role-audit-count";
+    const auditHtml = `
+      <div class="role-audit-box">
+        <div class="role-audit-header">
+          <span>${escapeHtml(opt.primary_role_label || "Role Audit")}</span>
+          <span class="${auditCountClass}">${audit.current_count} in deck (${audit.deck_percentage}%)</span>
+        </div>
+        <div class="role-audit-text">${escapeHtml(audit.gap_description || "")}</div>
+      </div>
+    `;
+
+    // Combos HTML
+    let combosHtml = "";
+    const cardCombos = opt.card_combos || [];
+    const relicCombos = opt.relic_combos || [];
+    if (cardCombos.length > 0 || relicCombos.length > 0) {
+      const cItems = cardCombos.map(combo =>
+        `<div class="combo-chip"><span class="combo-tag card">CARD</span><strong>${escapeHtml(combo.partner)}</strong>: ${escapeHtml(combo.explanation)}</div>`
+      ).join("");
+      const rItems = relicCombos.map(rcombo =>
+        `<div class="combo-chip"><span class="combo-tag relic">RELIC</span><strong>${escapeHtml(rcombo.relic)}</strong>: ${escapeHtml(rcombo.explanation)}</div>`
+      ).join("");
+
+      combosHtml = `
+        <div class="combos-container">
+          <div class="combos-header"><span>⚡</span> Synergies with Deck & Relics</div>
+          ${cItems}
+          ${rItems}
+        </div>
+      `;
+    }
+
+    const prosHtml = (opt.pros || []).map(p => `<div class="pro-item"><span>+</span><span>${escapeHtml(p)}</span></div>`).join("");
+    const consHtml = (opt.cons || []).map(con => `<div class="con-item"><span>-</span><span>${escapeHtml(con)}</span></div>`).join("");
 
     let pStatHtml = "";
     if (opt.personal_stats) {
       const ps = opt.personal_stats;
-      pStatHtml = `<div class="personal-stat-tag">📊 Your Stats: ${ps.win_rate}% Win Rate (${ps.drafted_runs} runs) | Picked ${ps.pick_rate}%</div>`;
+      pStatHtml = `<div class="personal-stat-tag">📊 Your History: ${escapeHtml(ps.highlight)} | Picked ${ps.pick_rate}%</div>`;
     }
 
     cardEl.innerHTML = `
@@ -510,15 +551,14 @@ function renderAdviceResults(data) {
           <span class="ranked-card-title">${escapeHtml(c.name)}</span><br>
           <span class="card-type-tag type-${c.card_type}">${escapeHtml(c.card_type || "Card")} (${escapeHtml(c.character || "all")})</span>
         </div>
-        <div class="score-badge">${opt.score.toFixed(1)}</div>
+        <div class="tactical-badge badge-${fitClass}">${escapeHtml(opt.tactical_fit)}</div>
       </div>
       <div class="card-description-box">${escapeHtml(c.description || "No text")}</div>
+      ${auditHtml}
+      ${combosHtml}
       <div class="reasoning-list">
         ${prosHtml}
         ${consHtml}
-        <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
-          Upgrade Priority: <strong style="color:#e2e8f0;">${escapeHtml(opt.upgrade_priority)}</strong>
-        </div>
       </div>
       ${pStatHtml}
     `;

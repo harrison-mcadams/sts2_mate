@@ -103,6 +103,40 @@ class TestSTS2Companion(unittest.TestCase):
         self.assertIn("verdict", advice)
         self.assertEqual(len(advice["ranked_options"]), 3)
 
+    def test_qualitative_synergy_and_role_audit(self):
+        """Verify role audit, card combos, and relic combos."""
+        mock_run = {
+            "current_floor": 3,
+            "current_act": 1,
+            "character": "Ironclad",
+            "current_hp": 65,
+            "max_hp": 80,
+            "hp_percent": 81.2,
+            "deck": [
+                {"id": "CARD.STRIKE_IRONCLAD", "name": "Strike", "card_type": "Attack"},
+                {"id": "CARD.DEFEND_IRONCLAD", "name": "Defend", "card_type": "Skill"},
+                {"id": "CARD.INFLAME", "name": "Inflame", "card_type": "Power"},
+                {"id": "CARD.DISMANTLE", "name": "Dismantle", "card_type": "Attack"},
+            ],
+            "relics": [{"id": "RELIC.AKABEKO", "name": "Akabeko"}],
+        }
+        # Offered: Whirlwind (AOE), Twin Strike (multi-hit), Defend (basic skill)
+        offered = ["CARD.WHIRLWIND", "CARD.TWIN_STRIKE", "CARD.DEFEND_IRONCLAD"]
+        result = self.advisor.evaluate_reward(offered, mock_run)
+
+        # Whirlwind should audit 0 AOE in deck and flag as critical gap
+        ww_opt = next(o for o in result["ranked_options"] if o["card"]["id"] == "CARD.WHIRLWIND")
+        self.assertEqual(ww_opt["tactical_fit"], "Fills Critical Gap")
+        self.assertEqual(ww_opt["role_audit"]["current_count"], 0)
+        self.assertTrue(ww_opt["role_audit"]["is_critical"])
+
+        # Twin Strike should combo with Inflame (Strength) and Akabeko
+        twin_opt = next(o for o in result["ranked_options"] if o["card"]["id"] == "CARD.TWIN_STRIKE")
+        self.assertGreater(len(twin_opt["card_combos"]), 0)
+        self.assertIn("Inflame", twin_opt["card_combos"][0]["partner"])
+        self.assertGreater(len(twin_opt["relic_combos"]), 0)
+        self.assertEqual(twin_opt["relic_combos"][0]["relic"], "Akabeko")
+
 
 if __name__ == "__main__":
     unittest.main()

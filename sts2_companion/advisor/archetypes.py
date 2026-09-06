@@ -1,10 +1,11 @@
 """
-Archetype definitions, card roles, and tag inferences for Slay the Spire 2.
+Archetype definitions, card roles, and synergy linkages for Slay the Spire 2.
+Surfaces qualitative deck gap audits and explicit card-to-card / relic-to-card combos.
 """
 
 from typing import Any, Dict, List, Set, Tuple
 
-# Core strategic roles
+# Core strategic problem-solving roles
 ROLE_FRONTLOAD_DAMAGE = "frontload_damage"
 ROLE_AOE_DAMAGE = "aoe_damage"
 ROLE_SCALING_DAMAGE = "scaling_damage"
@@ -22,6 +23,24 @@ ROLE_ORB = "orb"
 ROLE_SUMMON = "summon"
 ROLE_RETAIN = "retain"
 
+ROLE_LABELS = {
+    ROLE_AOE_DAMAGE: "Area of Effect (AOE)",
+    ROLE_FRONTLOAD_DAMAGE: "Single-Target Damage",
+    ROLE_BLOCK: "Block & Mitigation",
+    ROLE_SCALING_DAMAGE: "Scaling Damage",
+    ROLE_SCALING_DEFENSE: "Scaling Defense",
+    ROLE_DRAW: "Card Draw & Velocity",
+    ROLE_ENERGY: "Energy Economy",
+    ROLE_EXHAUST: "Exhaust Engine",
+    ROLE_STRENGTH: "Strength Scaling",
+    ROLE_VULNERABLE: "Vulnerable Infliction",
+    ROLE_WEAK: "Weak Mitigation",
+    ROLE_POISON: "Poison Scaling",
+    ROLE_SHIV: "Shiv Swarm",
+    ROLE_ORB: "Orb Mechanics",
+    ROLE_SUMMON: "Minion / Companion",
+}
+
 
 def infer_card_roles(card: Dict[str, Any]) -> Set[str]:
     """Infers functional strategic roles from card text and metadata."""
@@ -34,29 +53,32 @@ def infer_card_roles(card: Dict[str, Any]) -> Set[str]:
     # Frontload / Direct Damage
     if ctype == "Attack":
         roles.add(ROLE_FRONTLOAD_DAMAGE)
-        if any(w in desc or w in name for w in ["all enemies", "all other enemies", "to all", "flurry", "spray", "whirlwind", "cleave"]):
+        if any(w in desc or w in name for w in [
+            "all enemies", "all other enemies", "to all", "flurry", "spray",
+            "whirlwind", "cleave", "thunderclap", "immolate", "combust"
+        ]):
             roles.add(ROLE_AOE_DAMAGE)
         if any(w in desc for w in ["times", "twice", "3 times", "4 times", "x times"]):
             roles.add("multi_hit")
 
     # Scaling Damage
-    if any(w in desc for w in ["strength", "for each", "permanently", "increases", "damage this combat"]):
+    if any(w in desc for w in ["strength", "for each", "permanently", "increases", "damage this combat", "ritual"]):
         roles.add(ROLE_SCALING_DAMAGE)
         if "strength" in desc:
             roles.add(ROLE_STRENGTH)
 
     # Block & Defense
-    if "block" in desc:
+    if "block" in desc or "shield" in desc:
         roles.add(ROLE_BLOCK)
-        if any(w in desc for w in ["dexterity", "metallicize", "barricade", "plated armor", "next turn"]):
+        if any(w in desc for w in ["dexterity", "metallicize", "barricade", "plated armor", "next turn", "entrench"]):
             roles.add(ROLE_SCALING_DEFENSE)
 
     # Draw & Filter
-    if any(w in desc for w in ["draw", "discard", "scry", "into your hand"]):
+    if any(w in desc for w in ["draw", "discard", "scry", "into your hand", "retrieve"]):
         roles.add(ROLE_DRAW)
 
     # Energy
-    if any(w in desc for w in ["[energy]", "gain energy", "energy next turn"]):
+    if any(w in desc for w in ["[energy]", "gain energy", "energy next turn", "gain [e]"]):
         roles.add(ROLE_ENERGY)
 
     # Exhaust
@@ -84,54 +106,180 @@ def infer_card_roles(card: Dict[str, Any]) -> Set[str]:
     return roles
 
 
-def calculate_relic_synergy(card: Dict[str, Any], relic_ids: Set[str]) -> Tuple[float, List[str]]:
-    """Calculates synergy score and explanations between a candidate card and active relics."""
-    from typing import Tuple
-    bonus = 0.0
-    notes = []
-    roles = infer_card_roles(card)
-    cid = card.get("id", "")
-    ctype = card.get("card_type", "Skill")
+def find_card_combos(candidate_card: Dict[str, Any], deck_cards: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    """
+    Identifies direct, explicit card-to-card synergies between an offered card and cards currently in the deck.
+    """
+    combos = []
+    c_name = candidate_card.get("name", "")
+    c_desc = candidate_card.get("description", "").lower()
+    c_type = candidate_card.get("card_type", "Skill")
+    c_roles = infer_card_roles(candidate_card)
 
-    # Akabeko (Heavy first-turn attack)
-    if "RELIC.AKABEKO" in relic_ids:
-        if ctype == "Attack":
-            if "multi_hit" in roles:
-                bonus += 1.5
-                notes.append("Synergizes with Akabeko Vigor for multi-hit burst")
-            else:
-                bonus += 0.8
-                notes.append("Benefits from Akabeko opening turn burst")
+    deck_names = {c.get("name", ""): c for c in deck_cards}
+    deck_ids = {c.get("id", ""): c for c in deck_cards}
 
-    # Lantern / Energy Relics
-    energy_relics = {"RELIC.LANTERN", "RELIC.ANCIENT_TEA_SET", "RELIC.HAPPY_FLOWER", "RELIC.ENERGY_REPUTATION"}
-    if relic_ids.intersection(energy_relics):
-        if card.get("cost", 1) >= 2:
-            bonus += 0.6
-            notes.append("High-cost card enabled by active energy relics")
+    # 1. Strength Scaling Synergies
+    strength_cards = [name for name in ["Inflame", "Spot Weakness", "Demon Form", "Limit Break", "Vajra"] if name in deck_names]
+    if "multi_hit" in c_roles and strength_cards:
+        combos.append({
+            "partner": ", ".join(strength_cards),
+            "type": "Strength Multiplier",
+            "explanation": f"Scales multiple times per hit with your {', '.join(strength_cards)}"
+        })
+    elif c_name in ["Heavy Blade", "Sword Boomerang", "Twin Strike", "Pummel"] and strength_cards:
+        combos.append({
+            "partner": ", ".join(strength_cards),
+            "type": "Strength Scaling",
+            "explanation": f"Turns active Strength into massive single-turn burst"
+        })
+    elif ROLE_STRENGTH in c_roles:
+        multi_hit_attacks = [c.get("name") for c in deck_cards if "multi_hit" in infer_card_roles(c)]
+        if multi_hit_attacks:
+            combos.append({
+                "partner": ", ".join(set(multi_hit_attacks[:3])),
+                "type": "Damage Amplification",
+                "explanation": f"Directly powers up your multi-hit attacks ({', '.join(set(multi_hit_attacks[:3]))})"
+            })
 
-    # Shuriken / Kunai / Ornamental Fan (Play 3 attacks)
-    ninja_relics = {"RELIC.SHURIKEN", "RELIC.KUNAI", "RELIC.ORNAMENTAL_FAN"}
-    if relic_ids.intersection(ninja_relics):
-        if ctype == "Attack" and card.get("cost", 1) <= 1:
-            bonus += 1.2
-            notes.append("Low-cost attack triggers Ninja relics (3 attacks/turn)")
+    # 2. Exhaust Engine Synergies
+    exhaust_triggers = [name for name in ["Dark Embrace", "Feel No Pain", "Corruption", "Sentinel"] if name in deck_names]
+    if ROLE_EXHAUST in c_roles and exhaust_triggers:
+        combos.append({
+            "partner": ", ".join(exhaust_triggers),
+            "type": "Exhaust Engine",
+            "explanation": f"Triggers card draw / block bonuses from {', '.join(exhaust_triggers)}"
+        })
+    elif c_name in ["Dark Embrace", "Feel No Pain"]:
+        exhaust_sources = [c.get("name") for c in deck_cards if "exhaust" in c.get("description", "").lower()]
+        if exhaust_sources:
+            combos.append({
+                "partner": ", ".join(set(exhaust_sources[:3])),
+                "type": "Engine Payoff",
+                "explanation": f"Generates recurring value from your {len(exhaust_sources)} exhaust cards"
+            })
 
-    # Dead Branch / Charon's Ashes (Exhaust synergies)
-    exhaust_relics = {"RELIC.DEAD_BRANCH", "RELIC.CHARONS_ASHES"}
-    if relic_ids.intersection(exhaust_relics) and ROLE_EXHAUST in roles:
-        bonus += 2.0
-        notes.append("High synergy with active Exhaust relics")
+    # 3. Block Synergy (Body Slam / Barricade / Entrench)
+    heavy_block_cards = [c.get("name") for c in deck_cards if any(w in c.get("name", "").lower() for w in ["blood wall", "impervious", "power through", "flame barrier"])]
+    if c_name == "Body Slam" and heavy_block_cards:
+        combos.append({
+            "partner": ", ".join(set(heavy_block_cards)),
+            "type": "Defense-to-Damage",
+            "explanation": f"Converts high block from {', '.join(set(heavy_block_cards))} directly into 0-cost damage"
+        })
+    elif c_name in ["Barricade", "Entrench"] and heavy_block_cards:
+        combos.append({
+            "partner": ", ".join(set(heavy_block_cards)),
+            "type": "Block Retention",
+            "explanation": f"Preserves and compounds the high block generated by {', '.join(set(heavy_block_cards))}"
+        })
 
-    # Snecko Eye (High cost cards)
-    if "RELIC.SNECKO_EYE" in relic_ids:
-        if card.get("cost", 1) >= 2:
-            bonus += 1.8
-            notes.append("High natural cost benefits greatly from Snecko Eye randomized cost")
+    # 4. Vulnerable Enablers & Heavy Damage
+    if ROLE_VULNERABLE in c_roles:
+        big_attacks = [c.get("name") for c in deck_cards if c.get("card_type") == "Attack" and c.get("cost", 1) >= 2]
+        if big_attacks:
+            combos.append({
+                "partner": ", ".join(set(big_attacks[:2])),
+                "type": "Damage Amplification",
+                "explanation": f"Increases damage of your heavy attacks ({', '.join(set(big_attacks[:2]))}) by +50%"
+            })
 
-    # Bronze Scales (Thorns / Defensive stalls)
-    if "RELIC.BRONZE_SCALES" in relic_ids and ROLE_BLOCK in roles:
-        bonus += 0.4
-        notes.append("Pairs with passive Bronze Scales damage while turtling")
+    # 5. Energy Producers & High Cost Spells
+    if ROLE_ENERGY in c_roles:
+        expensive_cards = [c.get("name") for c in deck_cards if c.get("cost", 1) >= 2]
+        if expensive_cards:
+            combos.append({
+                "partner": ", ".join(set(expensive_cards[:3])),
+                "type": "Energy Acceleration",
+                "explanation": f"Smoothly finances your high-cost cards ({', '.join(set(expensive_cards[:3]))})"
+            })
+    elif candidate_card.get("cost", 1) >= 2:
+        energy_sources = [c.get("name") for c in deck_cards if ROLE_ENERGY in infer_card_roles(c)]
+        if energy_sources:
+            combos.append({
+                "partner": ", ".join(set(energy_sources)),
+                "type": "Energy Supported",
+                "explanation": f"High energy cost supported by your {', '.join(set(energy_sources))}"
+            })
 
-    return bonus, notes
+    # 6. Card Draw & Consistency
+    if ROLE_DRAW in c_roles:
+        high_impact_cards = [c.get("name") for c in deck_cards if c.get("card_type") in ["Power", "Attack"] and c.get("cost", 1) >= 2]
+        if high_impact_cards:
+            combos.append({
+                "partner": ", ".join(set(high_impact_cards[:2])),
+                "type": "Cycle & Velocity",
+                "explanation": f"Digs to consistently draw your core cards ({', '.join(set(high_impact_cards[:2]))})"
+            })
+
+    return combos
+
+
+def find_relic_combos(candidate_card: Dict[str, Any], relics: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    """
+    Identifies direct synergies between an offered card and equipped relics.
+    """
+    combos = []
+    c_name = candidate_card.get("name", "")
+    c_type = candidate_card.get("card_type", "Skill")
+    c_roles = infer_card_roles(candidate_card)
+    c_cost = candidate_card.get("cost", 1)
+
+    relic_map = {r.get("id", ""): r.get("name", r.get("id", "").replace("RELIC.", "").replace("_", " ").title()) for r in relics}
+
+    # Akabeko
+    if "RELIC.AKABEKO" in relic_map and c_type == "Attack":
+        if "multi_hit" in c_roles:
+            combos.append({
+                "relic": relic_map["RELIC.AKABEKO"],
+                "explanation": "Grants +8 Vigor damage to the first hit on Turn 1"
+            })
+        elif ROLE_AOE_DAMAGE in c_roles:
+            combos.append({
+                "relic": relic_map["RELIC.AKABEKO"],
+                "explanation": "Grants +8 damage to ALL enemies on your opening turn"
+            })
+        else:
+            combos.append({
+                "relic": relic_map["RELIC.AKABEKO"],
+                "explanation": "Empowers this attack with +8 damage on Turn 1"
+            })
+
+    # Ninja Relics (Kunai, Shuriken, Ornamental Fan)
+    ninja_hits = [rname for rid, rname in relic_map.items() if rid in ["RELIC.SHURIKEN", "RELIC.KUNAI", "RELIC.ORNAMENTAL_FAN"]]
+    if ninja_hits and c_type == "Attack" and c_cost <= 1:
+        combos.append({
+            "relic": ", ".join(ninja_hits),
+            "explanation": f"Efficient low-cost attack triggers your 3-attack/turn relics ({', '.join(ninja_hits)})"
+        })
+
+    # Snecko Eye
+    if "RELIC.SNECKO_EYE" in relic_map:
+        if c_cost >= 2:
+            combos.append({
+                "relic": relic_map["RELIC.SNECKO_EYE"],
+                "explanation": "2+ cost card heavily favored by Snecko Eye randomized cost & +2 draw"
+            })
+        elif c_cost == 0:
+            combos.append({
+                "relic": relic_map["RELIC.SNECKO_EYE"],
+                "explanation": "Warning: 0-cost card can be randomized to higher cost by Snecko Eye"
+            })
+
+    # Dead Branch / Charon's Ashes
+    exhaust_relics = [rname for rid, rname in relic_map.items() if rid in ["RELIC.DEAD_BRANCH", "RELIC.CHARONS_ASHES"]]
+    if exhaust_relics and ROLE_EXHAUST in c_roles:
+        combos.append({
+            "relic": ", ".join(exhaust_relics),
+            "explanation": f"Directly triggers your active exhaust relics ({', '.join(exhaust_relics)})"
+        })
+
+    # Vajra
+    if "RELIC.VAJRA" in relic_map and c_type == "Attack":
+        if "multi_hit" in c_roles:
+            combos.append({
+                "relic": relic_map["RELIC.VAJRA"],
+                "explanation": "Passive +1 Strength multiplies across each hit"
+            })
+
+    return combos
