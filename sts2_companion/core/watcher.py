@@ -16,14 +16,14 @@ DEFAULT_PROFILE_DIR = get_default_save_dir() or r"C:\Users\harri\AppData\Roaming
 
 
 class STS2LiveWatcher:
-    def __init__(self, profile_dir: str = DEFAULT_PROFILE_DIR, data_dir: str = "data", poll_interval: float = 1.0):
-        self.profile_dir = profile_dir
+    def __init__(self, profile_dir: Optional[str] = None, data_dir: str = "data", poll_interval: float = 1.0):
+        self.profile_dir = profile_dir or get_default_save_dir() or DEFAULT_PROFILE_DIR
         self.data_dir = data_dir
         self.poll_interval = poll_interval
         self.parser = STS2SaveParser(data_dir=data_dir)
 
-        self.current_save_path = os.path.join(profile_dir, "current_run.save")
-        self.history_dir = os.path.join(profile_dir, "history")
+        self.current_save_path = os.path.join(self.profile_dir, "current_run.save")
+        self.history_dir = os.path.join(self.profile_dir, "history")
 
         self.latest_state: Dict[str, Any] = {}
         self.is_running = False
@@ -33,6 +33,7 @@ class STS2LiveWatcher:
 
         self._last_active_mtime: float = 0.0
         self._last_history_mtime: float = 0.0
+        self._last_path_scan_time: float = 0.0
 
         # Perform initial state load
         self.check_updates(force=True)
@@ -45,9 +46,14 @@ class STS2LiveWatcher:
         with self._lock:
             if self.latest_state:
                 return dict(self.latest_state)
+
+            has_profile = os.path.exists(os.path.join(self.profile_dir, "progress.save")) or os.path.exists(os.path.join(self.profile_dir, "prefs.save"))
+            game_status = "MAIN_MENU" if has_profile else "WAITING_FOR_GAME"
+
             return {
                 "is_active": False,
-                "waiting_for_game": True,
+                "waiting_for_game": not has_profile,
+                "game_status": game_status,
                 "character": "Ironclad",
                 "ascension": 0,
                 "current_floor": 0,
@@ -88,7 +94,24 @@ class STS2LiveWatcher:
 
     def check_updates(self, force: bool = False) -> bool:
         """Checks if current_run.save or recent history files have changed."""
+        now = time.time()
+
+        # Dynamic path re-discovery: if current path doesn't have an active save or profile, check if STS2 launched
         has_active = os.path.exists(self.current_save_path)
+        has_profile = os.path.exists(os.path.join(self.profile_dir, "progress.save"))
+
+        if not has_active and not has_profile and (now - self._last_path_scan_time > 3.0):
+            self._last_path_scan_time = now
+            new_dir = get_default_save_dir()
+            if new_dir and new_dir != self.profile_dir:
+                if os.path.exists(new_dir) and (os.path.exists(os.path.join(new_dir, "current_run.save")) or os.path.exists(os.path.join(new_dir, "progress.save"))):
+                    print(f"\n[+] Auto-detected Slay the Spire 2 active save path: {new_dir}")
+                    self.profile_dir = new_dir
+                    self.current_save_path = os.path.join(new_dir, "current_run.save")
+                    self.history_dir = os.path.join(new_dir, "history")
+                    has_active = os.path.exists(self.current_save_path)
+                    force = True
+
         changed = False
 
         if has_active:
@@ -98,19 +121,21 @@ class STS2LiveWatcher:
                     self._last_active_mtime = mtime
                     parsed = self.parser.parse_file(self.current_save_path, is_active=True)
                     if parsed:
+                        parsed["game_status"] = "RUN_ACTIVE"
+                        parsed["monitored_path"] = self.profile_dir
                         with self._lock:
                             self.latest_state = parsed
                         changed = True
             except Exception as e:
                 print(f"Error reading active run: {e}")
         else:
-            # Not currently in an active run; show latest completed run from history
+            # Not currently in an active run; show latest completed run from history if available
             if force or self._last_active_mtime != 0.0:
                 self._last_active_mtime = 0.0
                 changed = True
 
             # Find latest run file in history
-            run_files = glob.glob(os.path.join(self.history_dir, "*.run"))
+            run_files = glob.glob(os.path.join(self.history_dir, "*.run")) if os.path.exists(self.history_dir) else []
             if run_files:
                 latest_rf = max(run_files, key=os.path.getmtime)
                 mtime = os.path.getmtime(latest_rf)
@@ -118,9 +143,17 @@ class STS2LiveWatcher:
                     self._last_history_mtime = mtime
                     parsed = self.parser.parse_file(latest_rf, is_active=False)
                     if parsed:
+                        parsed["game_status"] = "IDLE_LATEST_RUN"
+                        parsed["monitored_path"] = self.profile_dir
                         with self._lock:
                             self.latest_state = parsed
                         changed = True
+            else:
+                # No run files in history
+                if force:
+                    with self._lock:
+                        self.latest_state = self.get_state()
+                    changed = True
 
         if changed:
             state = self.get_state()

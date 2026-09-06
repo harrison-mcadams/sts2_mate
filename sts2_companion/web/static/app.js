@@ -100,12 +100,15 @@ function updateHUD(state) {
 
   if (!state) return;
 
-  if (state.is_active) {
+  if (state.is_active || state.game_status === "RUN_ACTIVE") {
     statusBadge.className = "status-badge live";
     statusText.textContent = "LIVE RUN ACTIVE";
-  } else if (state.waiting_for_game) {
+  } else if (state.game_status === "MAIN_MENU") {
     statusBadge.className = "status-badge idle";
-    statusText.textContent = "CONNECTED (WAITING FOR RUN)";
+    statusText.textContent = "AT MAIN MENU (EMBARK ON RUN TO TRACK)";
+  } else if (state.waiting_for_game || state.game_status === "WAITING_FOR_GAME") {
+    statusBadge.className = "status-badge idle";
+    statusText.textContent = "WAITING FOR STS2 TO START";
   } else {
     statusBadge.className = "status-badge idle";
     statusText.textContent = "IDLE (SHOWING LATEST RUN)";
@@ -118,7 +121,7 @@ function updateHUD(state) {
   document.getElementById("valChar").textContent = state.character || "IRONCLAD";
   document.getElementById("valAsc").textContent = `A${state.ascension || 0}`;
   
-  if (state.waiting_for_game && (!state.current_floor || state.current_floor === 0)) {
+  if ((state.waiting_for_game || state.game_status === "MAIN_MENU") && (!state.current_floor || state.current_floor === 0)) {
     document.getElementById("valFloor").textContent = "Not in run";
   } else {
     document.getElementById("valFloor").textContent = `Floor ${state.current_floor || 1} (Act ${state.current_act || 1})`;
