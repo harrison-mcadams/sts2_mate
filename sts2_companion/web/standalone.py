@@ -23,6 +23,7 @@ from ..advisor.evaluator import STS2CardRewardAdvisor
 class SafeThreadingHTTPServer(ThreadingHTTPServer):
     """Threading server that suppresses harmless client disconnect tracebacks."""
     daemon_threads = True
+    allow_reuse_address = True
 
     def handle_error(self, request, client_address):
         exc_type, _, _ = sys.exc_info()
@@ -259,6 +260,11 @@ def run_standalone_server(
     ConfiguredHandler.static_dir = static_dir
     ConfiguredHandler.templates_dir = templates_dir
 
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
     server = None
     actual_port = port
     for p in range(port, port + 10):
@@ -273,7 +279,10 @@ def run_standalone_server(
         raise OSError(f"Could not bind to ports {port}-{port+9}")
 
     if actual_port != port:
-        print(f"\n[!] Note: Port {port} was busy. Bound to port {actual_port} instead.")
+        print(f"\n[!] Note: Port {port} was occupied. Successfully bound to port {actual_port} instead!", flush=True)
 
-    print(f"[*] Server listening on {host}:{actual_port}...")
+    print(f"\n" + "=" * 60, flush=True)
+    print(f"[*] Companion Server is ONLINE and waiting for connections!", flush=True)
+    print(f"    -> Listening on {host}:{actual_port}", flush=True)
+    print("=" * 60 + "\n", flush=True)
     server.serve_forever()

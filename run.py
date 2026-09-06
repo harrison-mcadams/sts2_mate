@@ -48,14 +48,19 @@ def main():
     if args.network:
         args.host = "0.0.0.0"
 
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
     cards_file = os.path.join(data_dir, "sts2_cards.json")
     effective_save_dir = args.save_dir or get_default_save_dir()
     effective_game_dir = args.game_dir or get_default_game_dir()
 
-    print("\n" + "=" * 60)
-    print("        [+] SLAY THE SPIRE 2 COMPANION APP (sts2_mate)")
-    print("=" * 60)
+    print("\n" + "=" * 60, flush=True)
+    print("        [+] SLAY THE SPIRE 2 COMPANION APP (sts2_mate)", flush=True)
+    print("=" * 60, flush=True)
 
     # 1. Sync / Extract STS2 Game Data if needed
     if args.sync_game or not os.path.exists(cards_file):

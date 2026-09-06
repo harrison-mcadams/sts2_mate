@@ -126,11 +126,14 @@ class STS2LiveWatcher:
                         with self._lock:
                             self.latest_state = parsed
                         changed = True
+                        print(f"\n[+] >>> LIVE RUN ACTIVE! Floor {parsed.get('current_floor', 1)} | HP: {parsed.get('current_hp')}/{parsed.get('max_hp')} | {parsed.get('character', 'Hero')} <<<", flush=True)
             except Exception as e:
-                print(f"Error reading active run: {e}")
+                print(f"Error reading active run: {e}", flush=True)
         else:
             # Not currently in an active run; show latest completed run from history if available
             if force or self._last_active_mtime != 0.0:
+                if self._last_active_mtime != 0.0:
+                    print("\n[i] Run ended or returned to Main Menu.", flush=True)
                 self._last_active_mtime = 0.0
                 changed = True
 

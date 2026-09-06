@@ -22,8 +22,16 @@ echo "[*] Launching Companion Server on local network..."
 echo "[*] (Zero dependencies required - running with pure Python standard library)"
 echo ""
 
-# Ensure port 5050 is free from previous runs
+# Clean up any previous server instances and ensure port 5050 is free
+pkill -f "run.py" 2>/dev/null || true
 fuser -k 5050/tcp 2>/dev/null || true
+fuser -k 5051/tcp 2>/dev/null || true
+sleep 0.3
 
-# Run with --network so you can open on phone/tablet on same Wi-Fi
-python3 run.py --network --no-browser
+# Ensure SteamOS firewall doesn't block port 5050 (non-interactive sudo if permitted)
+if command -v iptables &> /dev/null; then
+    sudo -n iptables -I INPUT -p tcp --dport 5050 -j ACCEPT 2>/dev/null || true
+fi
+
+# Run with PYTHONUNBUFFERED=1 and -u so all logs print to Konsole in real time
+PYTHONUNBUFFERED=1 python3 -u run.py --network --no-browser
