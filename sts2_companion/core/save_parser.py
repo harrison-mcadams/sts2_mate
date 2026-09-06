@@ -83,7 +83,30 @@ class STS2SaveParser:
         acts = raw_data.get("acts", [])
 
         # Player stats
-        raw_char = player_raw.get("character", "UNKNOWN")
+        raw_char = player_raw.get("character_id") or player_raw.get("character") or raw_data.get("character_id") or raw_data.get("character") or "UNKNOWN"
+        
+        # Fallback from starting relics or deck if still UNKNOWN
+        if raw_char == "UNKNOWN":
+            raw_relic_ids = {r.get("id", "") for r in player_raw.get("relics", [])}
+            if "RELIC.BURNING_BLOOD" in raw_relic_ids:
+                raw_char = "CHARACTER.IRONCLAD"
+            elif "RELIC.RING_OF_THE_SNAKE" in raw_relic_ids:
+                raw_char = "CHARACTER.SILENT"
+            elif "RELIC.CRACKED_CORE" in raw_relic_ids:
+                raw_char = "CHARACTER.DEFECT"
+            else:
+                for c in player_raw.get("deck", []):
+                    cid = c.get("id", "")
+                    if "IRONCLAD" in cid or cid in {"CARD.BASH"}:
+                        raw_char = "CHARACTER.IRONCLAD"
+                        break
+                    elif "SILENT" in cid or cid in {"CARD.NEUTRALIZE", "CARD.SURVIVOR"}:
+                        raw_char = "CHARACTER.SILENT"
+                        break
+                    elif "DEFECT" in cid or cid in {"CARD.ZAP", "CARD.DUALCAST"}:
+                        raw_char = "CHARACTER.DEFECT"
+                        break
+
         character_name = raw_char.replace("CHARACTER.", "").title()
         current_hp = player_raw.get("current_hp", 0)
         max_hp = player_raw.get("max_hp", 0)
