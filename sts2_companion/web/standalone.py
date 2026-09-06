@@ -189,6 +189,13 @@ class STS2RequestHandler(BaseHTTPRequestHandler):
             except Exception:
                 pass
 
+    def log_message(self, format, *args):
+        # Print concise request log to Konsole
+        try:
+            print(f"[{self.client_address[0]}] {self.command} {self.path}")
+        except Exception:
+            pass
+
     def _serve_file(self, full_path: str, content_type: str):
         if not os.path.exists(full_path):
             self.send_error(404, "File Not Found")
@@ -226,7 +233,7 @@ def run_standalone_server(
     data_dir: str = "data",
     save_dir: Optional[str] = None
 ) -> None:
-    """Launches the zero-dependency companion HTTP server."""
+    """Launches the zero-dependency companion HTTP server with port conflict fallback."""
     base_web = os.path.dirname(os.path.abspath(__file__))
     static_dir = os.path.join(base_web, "static")
     templates_dir = os.path.join(base_web, "templates")
@@ -252,5 +259,21 @@ def run_standalone_server(
     ConfiguredHandler.static_dir = static_dir
     ConfiguredHandler.templates_dir = templates_dir
 
-    server = SafeThreadingHTTPServer((host, port), ConfiguredHandler)
+    server = None
+    actual_port = port
+    for p in range(port, port + 10):
+        try:
+            server = SafeThreadingHTTPServer((host, p), ConfiguredHandler)
+            actual_port = p
+            break
+        except OSError:
+            continue
+
+    if not server:
+        raise OSError(f"Could not bind to ports {port}-{port+9}")
+
+    if actual_port != port:
+        print(f"\n[!] Note: Port {port} was busy. Bound to port {actual_port} instead.")
+
+    print(f"[*] Server listening on {host}:{actual_port}...")
     server.serve_forever()

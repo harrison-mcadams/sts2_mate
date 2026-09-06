@@ -22,5 +22,8 @@ echo "[*] Launching Companion Server on local network..."
 echo "[*] (Zero dependencies required - running with pure Python standard library)"
 echo ""
 
+# Ensure port 5050 is free from previous runs
+fuser -k 5050/tcp 2>/dev/null || true
+
 # Run with --network so you can open on phone/tablet on same Wi-Fi
 python3 run.py --network --no-browser
